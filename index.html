@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haunted Mound Merch Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --dark-red: #ff0000;
+            --red: #DC143C;
+            --light-red: #ff2600;
+            --gray: #ff0000;
+            --light-gray: #ff0000;
+            --white: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--black);
+            color: var(--white);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 0, 0, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(220, 20, 60, 0.1) 0%, transparent 20%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--red), var(--light-red));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(220, 20, 60, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--light-gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(44, 44, 44, 0.7);
+            border-radius: 12px;
+            border: 1px solid var(--dark-red);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-section select {
+            background: rgba(44, 44, 44, 0.8);
+            border: 1px solid var(--dark-red);
+            color: var(--white);
+            padding: 10px 15px;
+            border-radius: 30px;
+            outline: none;
+        }
+
+        .filter-section select:focus {
+            border-color: var(--red);
+        }
+
+        .merch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .merch-card {
+            background: rgba(44, 44, 44, 0.7);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--dark-red);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .merch-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border-color: var(--red);
+        }
+
+        .card-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .card-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--red);
+        }
+
+        .card-year {
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        .card-image {
+            height: 200px;
+            background: linear-gradient(45deg, var(--dark-red), var(--gray));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-description {
+            color: var(--light-gray);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .image-count {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--red);
+        }
+
+        .empty-state p {
+            color: var(--light-gray);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Lightbox Styles */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border: 3px solid var(--dark-red);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(220, 20, 60, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .lightbox-nav button {
+            background: rgba(139, 0, 0, 0.7);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-nav button:hover {
+            background: var(--red);
+            transform: scale(1.1);
+        }
+
+        .lightbox-thumbnails {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .thumbnail:hover, .thumbnail.active {
+            border-color: var(--red);
+            transform: scale(1.05);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lightbox-info {
+            text-align: center;
+            margin-top: 20px;
+            padding: 0 20px;
+        }
+
+        .lightbox-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--red);
+        }
+
+        .lightbox-info p {
+            color: var(--light-gray);
+            max-width: 600px;
+            margin: 0 auto 15px;
+            line-height: 1.6;
+        }
+
+        .lightbox-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--red);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--light-gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(139, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+
+        .ghost-icon {
+            position: absolute;
+            font-size: 8rem;
+            opacity: 0.03;
+            z-index: -1;
+        }
+
+        .ghost-1 {
+            top: 10%;
+            left: 5%;
+        }
+
+        .ghost-2 {
+            bottom: 10%;
+            right: 5%;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-section {
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .merch-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .lightbox-nav button {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .lightbox-thumbnails {
+                gap: 5px;
+            }
+            
+            .thumbnail {
+                width: 60px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ghost-icon ghost-1"></div>
+    <div class="ghost-icon ghost-2"></div>
+    
+    <div class="container">
+        <header>
+            <h1>Haunted Mound Merch Tracker</h1>
+            <p class="subtitle">@xtremelyapathetic on IG</p>
+        </header>
+        
+        <div class="controls">
+            <div></div> <!-- Empty div for spacing -->
+            
+            <div class="filter-section">
+                <i class="fas fa-filter"></i>
+                <select id="yearFilter">
+                    <option value="2020">2020</option>                    
+                    <option value="2021">2021</option>                    
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="merch-grid" id="merchGrid">
+            <!-- Merch items will be populated by JavaScript -->
+        </div>
+        
+        <footer>
+            <p>Haunted Mound Merch Tracker</p>
+            <p>@xtremelyapathetic on IG</p>
+        </footer>
+    </div>
+    
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" id="lightboxClose">&times;</button>
+            <img class="lightbox-image" id="lightboxImage" src="" alt="">
+            <div class="lightbox-nav">
+                <button id="prevButton"><i class="fas fa-chevron-left"></i></button>
+                <button id="nextButton"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="lightbox-thumbnails" id="lightboxThumbnails"></div>
+            <div class="lightbox-info">
+                <h2 id="lightboxTitle"></h2>
+                <p id="lightboxDescription"></p>
+                <div class="lightbox-price" id="lightboxPrice"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample merch data with multiple Discord CDN images
+        const merchItems = [
+            {
+                id: 1,
+                name: "Skellingtons Longsleeve (Red/White)",
+                description: "Release date: March 29, 2020, Stock: 21 PCS",
+                price: 30.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408540986908344340/image.png?ex=68aa1d84&is=68a8cc04&hm=fd5c7cb640fba41faa6d51e1f18a3c2d1c4b17a854f93f34d18e4dc629abb376&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544082694901893/image.png?ex=68aa2066&is=68a8cee6&hm=34cc2cc82c03d45ffd3fe0a938d573c83e6b184258bb5250fe5dc320e01d6f5b&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544136478593214/image.png?ex=68aa2073&is=68a8cef3&hm=63d1efdb5c6aed65f2b2050edd40dd75bf1141d8f4d67f4524050c9c5c16df19&"
+                ]
+            },
+            {
+                id: 2,
+                name: "Skellingtons Longsleeve (Blue/White)",
+                description: "Release date: March 29, 2020, Stock: 20 PCS",
+                price: 30.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544754806821035/image.png?ex=68aa2107&is=68a8cf87&hm=913c2318b02288cff32c5635ad5a03b01293e70ce6d0743b02300a537590d585&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544812973555805/image.png?ex=68aa2114&is=68a8cf94&hm=5e77c6d52a79811df0b3a9626540b2641eccdb1f5c33c6fcde4d14582b81bed4&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544136478593214/image.png?ex=68aa2073&is=68a8cef3&hm=63d1efdb5c6aed65f2b2050edd40dd75bf1141d8f4d67f4524050c9c5c16df19&"
+                ]
+                
+            },
+            {
+                id: 3,
+                name: "Skellingtons Longsleeve (White/Black)",
+                description: "Release date: March 29, 2020, Stock: 20 PCS",
+                price: 30.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408545583081455908/image.png?ex=68aa21cc&is=68a8d04c&hm=e0f495595a2df5aae02b1b007f4bb0a94941fb6f381eb2f883d27be5ef0bfcfa&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544136478593214/image.png?ex=68aa2073&is=68a8cef3&hm=63d1efdb5c6aed65f2b2050edd40dd75bf1141d8f4d67f4524050c9c5c16df19&"
+                ]
+            },
+            {
+                id: 4,
+                name: "Skellingtons Longsleeve (Black/White)",
+                description: "Release date: March 29, 2020, Stock: 20 PCS",
+                price: 30.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408545909075218514/image.png?ex=68aa221a&is=68a8d09a&hm=c2718bdbd4d8a73b46ffbc103b54a4f294dcaf831ece36ba76bfce75a8d11293&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408544136478593214/image.png?ex=68aa2073&is=68a8cef3&hm=63d1efdb5c6aed65f2b2050edd40dd75bf1141d8f4d67f4524050c9c5c16df19&"
+                ]
+            },
+            {
+                id: 5,
+                name: "Rainbow Bridge 2 Cassette",
+                description: "Release date: April 23, 2020, Stock: 20 PCS",
+                price: 30.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408546234968572005/image.png?ex=68aa2267&is=68a8d0e7&hm=d94f6d613b0c61e1ac44e119b2fdd3e5387dc21652cc37ee497c46b4dadf434b&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408546268267155667/image.png?ex=68aa226f&is=68a8d0ef&hm=e383a13adf188cc5855af01b5245ca0c30cd740fffead68703fe9cac400afabb&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408546315683762216/image.png?ex=68aa227b&is=68a8d0fb&hm=be45f38f1644d1a0cb43fec27c303b48f974b01812b86231a1d37e50fd83df2a&"
+                ]
+            },
+            {
+                id: 6,
+                name: "Skellingtons Tee (Black/White) (v1)",
+                description: "Release date: August 14, 2020, Stock: 200 PCS",
+                price: 40.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408551810033127484/image.png?ex=68aa2799&is=68a8d619&hm=2824af88038e8e084c79262320751e1db35b11513df34be8ced504c32aa5550d&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408551838613115020/image.png?ex=68aa279f&is=68a8d61f&hm=c79015986c5a4e21879d37ef8b2959ff79fc9a1f3974aa2489c583c6286db19f&"
+                ]
+            },
+            {
+                id: 7,
+                name: "Ghost Mountain Logo / Horsemen Tee",
+                description: "Release date: August 14, 2020, Stock: 200 PCS",
+                price: 40.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408552853307523202/image.png?ex=68aa2891&is=68a8d711&hm=1ef0adf5a2a1e7eba84454a6caf4e44a1a7d8430447b7713f56ee53143eda845&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408551838613115020/image.png?ex=68aa279f&is=68a8d61f&hm=c79015986c5a4e21879d37ef8b2959ff79fc9a1f3974aa2489c583c6286db19f&"
+                ]
+            },
+            {
+                id: 8,
+                name: "Hundred Acre Wrist CD (1st  Burn) With Stickers",
+                description: "Release date: August 21, 2020, Stock: 100 PCS",
+                price: 20.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408553682210918593/image.png?ex=68aa2957&is=68a8d7d7&hm=2a7ab6fc4f0acfc736597f9dbece20dd6b30c6e026348698f9ecc7ac815db843&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408553725311586385/image.png?ex=68aa2961&is=68a8d7e1&hm=c0ae4e9ef1f2e721d6939683083f402e71a80640f92bac7e6660612458e2139e&"
+                ]
+            },
+            {
+                id: 9,
+                name: "Sematary / Skellingtons Logo Sticker",
+                description: "Release date: August 21, 2020, Stock: 100 PCS",
+                price: 0,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408554952191905872/image.png?ex=68aa2a86&is=68a8d906&hm=093605ccc0739d27647e6ca329de83bcc898e402f20efa6d35837b0b18c4204f&",
+                ]
+            },
+            {
+                id: 10,
+                name: "Ghost Mountain Logo / Horsemen Sticker",
+                description: "Release date: August 21, 2020, Stock: 100 PCS",
+                price: 0,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408555740385378355/image.png?ex=68aa2b42&is=68a8d9c2&hm=8a43fa5bb47bd9a5aa0a93aa8f27a10e347ebd6effc817cf17e91351a75c4576&",
+                ]
+            },
+            {
+                id: 11,
+                name: "Grave House CD (1st Burn)",
+                description: "Release date: September 11, 2020, Stock: 100 PCS",
+                price: 25.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408557041143906334/image.png?ex=68aa2c78&is=68a8daf8&hm=83ec924af4699c98d7a47f9a313739174e5941787dc91255018dcd257f499866&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408557080419369100/image.png?ex=68aa2c81&is=68a8db01&hm=0b966aa3914053b2c49b0293cfcf28a6bfc6195d13cac53c3c93989fd4583436&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408557119556288714/image.png?ex=68aa2c8b&is=68a8db0b&hm=7c9260c0744f950fc412fe98a090945bd03e67b96d7ef16d023434aa51217206&"
+                ]
+            },
+            {
+                id: 12,
+                name: "Hundred Acre Deer God Tee",
+                description: "Release date: September 25, 2020, Stock: 200 PCS",
+                price: 40.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408558680420384778/image.png?ex=68aa2dff&is=68a8dc7f&hm=8f73616630894c952ebfe3deee8af39a6cca859c7a9ae915aef0d9d03f947d9a&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408558735642857532/image.png?ex=68aa2e0c&is=68a8dc8c&hm=e8a220c0932ae3363a3d39246131a99756ab63c6da5d6d65c97bb34f595ed355&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408558761811120313/image.png?ex=68aa2e12&is=68a8dc92&hm=b02fc5a009e21e09fd2074b3477ffd20088329b96f3f73b698bcb763f0722734&"
+                ]
+            },
+            {
+                id: 13,
+                name: "Warboy CD (1st Burn)",
+                description: "Release date: September 25, 2020, Stock: 100 PCS",
+                price: 25.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559331561050122/image.png?ex=68aa2e9a&is=68a8dd1a&hm=c11d7572ab1a96a84b261bd2a5b48468258360899754a0bf7335eb1619ca6b3c&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559368676315338/image.png?ex=68aa2ea3&is=68a8dd23&hm=029d4111d596be47e16e6c7e9881aa780be82149a692fc50e19b3b463adad396&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559392764334141/image.png?ex=68aa2ea9&is=68a8dd29&hm=6e6f1277bb9a8e7e488e0b57c70462092220d6da857e552165bf59de805705ce&"
+                ]
+            },
+            {
+                id: 14,
+                name: "Rainbow Bridge CD (1st Burn)",
+                description: "Release date: October 23, 2020, Stock: 200 PCS",
+                price: 25.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559709803380828/image.png?ex=68aa2ef4&is=68a8dd74&hm=9a7125b02245dcf69bb183342e39153533e2ab5a735b166c126d92d3ffe1ac22&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559748428857404/image.png?ex=68aa2efd&is=68a8dd7d&hm=88baba15b4ed8b5f72b8df4bd46de3eced9a80603585da77f773fb50b94110c7&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408559896344920155/image.png?ex=68aa2f21&is=68a8dda1&hm=6424c18cdc64ec6c2f3ae4360251fc635d018eb15c9dedeff7987cd937bba2db&"
+                ]
+            },
+            {
+                id: 15,
+                name: "Hundred Acre Wrist CD (2nd Burn) With Stickers",
+                description: "Release date: November 20, 2020, Stock: 100 PCS",
+                price: 25.00,
+                year: 2020,
+                images: [
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408560472558669834/image.png?ex=68aa2faa&is=68a8de2a&hm=c00ea38be42dba95d897f60686320d59d1d4d1dd966a67c505fb4f8f98f3740a&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408560506326876171/image.png?ex=68aa2fb2&is=68a8de32&hm=024c73465172f1365fde0f9a33f06d629a9beb4cfd66707054a811e542538124&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408560550119735356/image.png?ex=68aa2fbc&is=68a8de3c&hm=018b0cac051bb94bee20b564b8a0d7235c19d4dc3d8de92df4d7e7ed5eb84779&"
+                ]
+            },
+
+         <!-- 2021 -->
+
+            {
+                id: 16,
+                name: "Sematary Haunted Mound Zip Up Hoodie (Black/White)",
+                description: "Release date: February 26, 2021, Stock: Unknown",
+                price: 65.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408564187751518470/image.png?ex=68aa3320&is=68a8e1a0&hm=0869c4a2871913fa053c5662272cc1499defb9f38ef1bf8af4cec5d426eb851c&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408564225348997171/image.png?ex=68aa3329&is=68a8e1a9&hm=5f5cbf3619900d10095c53d7f5ac55c05cb3294f15a20cc63e0760a37ebb109c&"
+                ]
+            },
+            {
+                id: 17,
+                name: "Dead By Dawn Tee",
+                description: "Release date: March 26, 2021, Stock: Unknown",
+                price: 45.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408565052579119239/image.png?ex=68aa33ee&is=68a8e26e&hm=bfaf3a43ece4d79d5ee4cd853e188d2413bdfd57ae596c3990618ae55fc717b2&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408565083898118154/image.png?ex=68aa33f5&is=68a8e275&hm=6dd15e8f4e4ccefe3b430e50fff48a98ea6a3647c9bc5d43ba31c98dd0174480&"       ]
+            },
+            {
+                id: 18,
+                name: "Ghost Mountain Longsleeve",
+                description: "Release date: March 26, 2021, Stock: Unknown",
+                price: 50.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408565431559786547/image.png?ex=68aa3448&is=68a8e2c8&hm=4c2e1e1d372d840d224009830c73d46df79f8dd6271c7bb04a66ce2f6bbb9d8b&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408565474844741664/image.png?ex=68aa3453&is=68a8e2d3&hm=7e6043f80810f3b5141dc442051101a2d8176d26c2e5f6eebc5e92fd97b34cbb&"       ]
+            },
+            {
+                id: 19,
+                name: "Sematary Nailbat Tee",
+                description: "Release date: March 26, 2021, Stock: Unknown",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408566483734233098/image.png?ex=68aa3543&is=68a8e3c3&hm=528896c88e580d0e8ce6ad93b9d4eaec591a672e0b70cf7524211afda4c6abb0&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408566525123887215/image.png?ex=68aa354d&is=68a8e3cd&hm=e1c661a20f7f5dc1f5634b8f12d1f851550754331fd76ce4e949929a28598a9c&"       ]
+            },
+            {
+                id: 20,
+                name: "Rainbow Bridge 3 CD (1st Burn) Came with Harold Patch",
+                description: "Release date: May 14, 2021, Stock: 100 PCS",
+                price: 35.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408566853877366956/image.png?ex=68aa359b&is=68a8e41b&hm=6b7237683e430e2ae205a2c1393fdeb31af18d2af698abecf98c26a65f63839c&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408566876912615474/image.png?ex=68aa35a1&is=68a8e421&hm=ca425a3c6129c4f785fd26066c5a6ca74f70a9b6b37643973830e60e57200358&",    
+                        "https://cdn.discordapp.com/attachments/1408540975688716322/1408566912274796654/image.png?ex=68aa35a9&is=68a8e429&hm=747599ffcbebc7550ad78ba1969c50235f641a76cb46f63e6087edbc22bc7f20&"   ]
+            },
+            {
+                id: 21,
+                name: "Rainbow Bridge 3 Cassette (v1) Came with Harold Patch",
+                description: "Release date: May 14, 2021, Stock: 100 PCS",
+                price: 35.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408567180911710349/image.png?ex=68aa35e9&is=68a8e469&hm=62daae597f1ff07f4746af84be8de76cfd41a48b86e2f53748678b92d4205121&",
+                          "https://cdn.discordapp.com/attachments/1408540975688716322/1408567215409729566/image.png?ex=68aa35f2&is=68a8e472&hm=1fb566eacd95ecc379dbd3fcb968dcef219b62116296f213167479faa8cb5b96&",      ]
+            },
+            {
+                id: 22,
+                name: "Harold Patch",
+                description: "Release date: May 14, 2021, Stock: 200 PCS",
+                price: 0,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408567763919962353/image.png?ex=68aa3674&is=68a8e4f4&hm=97cd11fa61bcf9fab88463d12dd0a4dba657d54e022036b8dd5fe2cbff4e87ae&",   ]
+            },
+            {
+                id: 23,
+                name: "Rainbow Bridge 3 Crucifixion Longsleeve",
+                description: "Release date: May 14, 2021, Stock: Unknown ",
+                price: 60.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408569639134560286/image.png?ex=68aa3833&is=68a8e6b3&hm=4c1358bc86c4757a277c3399a5ca6a13c0cf61cf35e6f16dc13038a84d3bf8e5&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408569675939451031/image.png?ex=68aa383c&is=68a8e6bc&hm=825835d1bae84677180df377f1a1c143e4794ffb1fb523058254be309171d40b&"
+                 ]
+            },
+            {
+                id: 24,
+                name: "Rainbow Bridge 3 Classic Longsleeve",
+                description: "Release date: May 14, 2021, Stock: Unknown ",
+                price: 60.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408569881883840522/image.png?ex=68aa386d&is=68a8e6ed&hm=59b8c55196edbb6f69cb7a10e5437f4921b65c817a5d0a21e367520c264f49e5&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408569930085044354/image.png?ex=68aa3879&is=68a8e6f9&hm=f5bfcdceeb4742d3e85267ad0a637c48c592ac694b980b7f2a1ca3d04a6d50cb&"
+                 ]
+            },
+            {
+                id: 25,
+                name: "Harold Chain 1st Version",
+                description: "Release date: July 30, 2021, Stock: Unknown ",
+                price: 100.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408570342867472496/u9rtwDw6aZc2YY4is_lV38_kNW6dheVboiCkYgWAP11vlV13QH44SGKBKqkIPzg0pp_x_W1lDbjY0p3NlU6vQigArVjvvoel53gjGPLnAD_LjVT-BjQ7V9QK9W05pvo6qdM_L-jvJGMw1280.png?ex=68aa38db&is=68a8e75b&hm=2ecbbc3cc326f83a52bfca8ed13827481f6759aca23ab47371d590f19414ffcc&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408570348479447195/F_wp0MQHJhnLzUqC14PCKIfB8pszSJBe8wZasucDV4OqzSs_BXlDBX9bs_zbgoawo0vtZeWPg1TbvFxAzadhzrVuLV3rm3zZxquc2MZyi5fQqlXqsK-5lOj-bKA22FPa_IQe1UHx4Qow1280.png?ex=68aa38dd&is=68a8e75d&hm=710a2786c1dbd0f68c2bbc6dbda1ab7f89711caa37ff27774bb9d12d37694e31&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408570369958482001/eGbS2BzGKfafvkdsTsJ_wvNu0RWexnDkS5-30AIUQDZBK8Q8V_qg3tjJjEzbMW42UQcjwLiXBXnHzGI22lRPtcgPZKmiIXU5z2yV18ZKw3oVWGIpxaCXDYs5RmB00K7WTjeA8T8iOhZOD8LXSOP-JyDj4msUtqfTJoA-MItEW1QlkI2N2lKapww1280.png?ex=68aa38e2&is=68a8e762&hm=204c7e75fba7d65a5e0ecfe74634a3ef8e96afa29aca9f4686e6dcfcbe3196d7&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408570663492653058/E62hvtgVgAIYsPB.png?ex=68aa3928&is=68a8e7a8&hm=e4840405fae1eae80bc2f98c63d771d016050f6148417ca464ae88441bb18742&"
+                ]
+            },
+            {
+                id: 26,
+                name: "RB3 CD 2nd Edition",
+                description: "Release date: September 10, 2021, Stock: Unknown ",
+                price: 25.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408792324234018948/pXLDAkdILhrDF3S5JdJGyjgzrXx3hr7i3keYfseb7EX3YLrYEmataZU36czZeUsertmjOBmPIA-Rp2LqreyPd5KQvnAzXpuIUvOTNmLrRLEB-7SaZXy3xLVu4k0u2pg8vgkQs_krtcYw1280.png?ex=68ab0798&is=68a9b618&hm=c06ecf535fa0c66982ce01cae6d3d40ddf046a80d80b26ae711ae3f2325e4ec1&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408792328235389019/zUDwTjt2cOhyOeiwHaQe87Ox7PhX3_XtDj-WqD0YGU9uDDK8_Ql-PTAzLE5Xelxnmq3Y6mp8HDx4-iZTqTuEFEqynRQBxwja-TgCw2IpUudf4hPI9iuRFBp-8iNXpZYha5EqerJRcu4w1280.png?ex=68ab0799&is=68a9b619&hm=3444afc6b18a1d7a0b88833b46750b81e4afcf36290e932a5f31a8c275f8f813&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408792339660668939/CpMkMv_o4_UokHpXO6aKlDe20epnWRn9WNP0dpd2zHPpODn81oVb3dSN0MVTidHK2J2dcvDa2lFiMNwPU_H52y-NmNibNQ5FAYh87A-eKGsq-LoEFDHoaDKD87XPTNWNQRVuOKuOx9Qw1280.png?ex=68ab079b&is=68a9b61b&hm=b6d8e422ce3f0bcc32547a3c0a5c779b3606b545a44ef1e4de89afdd24d1c18a&",
+                ]
+            },
+            {
+                id: 27,
+                name: "OG I <3 Haunted Mound Tee Metal Font",
+                description: "Release date: September 10, 2021, Stock: Unknown ",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408792625582047283/ZAVXX6NRW7n_KZiK8XMTvlM4xZoTKNjk3MQtarXdcRID1rJBT1UZJVuVZOgSR487XCj8jQwKT5WyKBO5KC4FaeaVaSNoQMMvL9D_UcCxZcORh5gxhA6xihfyE19MYY7bOpeXToVYGtgw1280.png?ex=68ab07e0&is=68a9b660&hm=f28505fe51554d3be9e14f5dc19f8750395aaf7ace35dce992d5bf51bc9cc259&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408792631470985347/GHbAQfEFNqWLQxBf5H9Yi854TXIfAssbUUk4jj-nwXOwlp05hA6fj3BuhatSFeOUNCCACyQ8RjovCgBwK4VfI3mR_CV8hLHFqMIDcjWf1gZb28VJOl5C76zCH0Zl4LI7f1VM4nAoaNow1280.png?ex=68ab07e1&is=68a9b661&hm=e2c4d4532c0173cf4d0cfd9aa577fad61abc3f559c927989f98d2a331b594ff1&",
+                ]
+            },
+            {
+                id: 28,
+                name: "2nd Skellingtons Tee Metal Font",
+                description: "Release date: September 10, 2021, Stock: Unknown ",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408793615089537149/fyBx_JqSSZlzypIGZhHcm602gckllA6YWdapJXSBn26J2JSQXhB100VCbQnRGLG-ctRzYlZ1FEWqXSE3LVPWvTm88DFqCdnfsejpY3UptYp-_UrbqzWtN38AzNzEXri5eyJDycFqPasw1280.png?ex=68ab08cb&is=68a9b74b&hm=b4aa0af319cccdc6a741bbef6f16918239f110cfc362ac49eb3892352a4e03d7&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408793629182660628/u1bu5XMK4c_zEAkrbH8IeWkOl5cNqBJ2p0jz0cz3Ymz1VvuouK31o9_CFlnYBqyeSNvJL1dH-azsjgmv-4oyBiTHqM8DGTpeo18Uhb5YX77BqhnP1t6NCJIbLjCGmPwhwAeZCzhDp20w1280.png?ex=68ab08cf&is=68a9b74f&hm=a3d383524aede6895d21d0d9535d001af3efb4f87225757267a82fdea6d5598e&",
+                ]
+            },
+            {
+                id: 29,
+                name: "Skinwalker Tee",
+                description: "Release date: September 10, 2021, Stock: Unknown ",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408795026213048482/MSLPaTjPyWTzRB1TqT_VvjAmTRLAhyzkNYge6gXDvyZ0LScoBgYQV5QqPFXzh_ysh5tL0AdwkuXVZW_QFPksc8ynqhdr_S8BMKgogtX4X0lMFaZsyXNDnsO1wBrk3N-Bza0CjSAtxmEw1280.png?ex=68ab0a1c&is=68a9b89c&hm=ee513565b3828f7faab0d6fc131a5246120a25a158a535ef6d1c771ea32ef7c2&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408795032508432394/WwcrT17FBKocdQJbafgTotd0P5kJgQrYTSsellzNmFh3KZeEIcQCChNf_Z5pIentN8RBpOBuhB8zOUWeWFD0m9nSi4_KtVZUk6-9OKwR2_g37aje7_toFcvS1vRdWgPvVxdeht-XxnMw1280.png?ex=68ab0a1d&is=68a9b89d&hm=9467bcd522d7ea234a398b50c6cf52d52ebaf3b47d966b263d53372180cd96b0&",
+                ]
+            },
+            {
+                id: 30,
+                name: "Screaming Forest Tee (Some Came with Stickers)",
+                description: "Release date: November 26, 2021, Stock: Unknown ",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408795877153439764/T2MpQJVeU6jvKuszJ70kMZS62jKuqGxuzweXc8B3nbgT1ArnfYWgnvwfE9mgdjliJQzivSlAnB1aqBTYEETduVFmHelFHclo5idw_6QDf4JBQ6mhVh0BiNQPk0Vz8DrzXCaU9yE-MLgw1280.png?ex=68ab0ae7&is=68a9b967&hm=54d042e7a18fb72f1858c9fa60b1cac5b2c671dd1f405155aa96a6a6bbeab48b&", 
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408795883973251072/FPH-AsKjDayrsaKuGsCtvq7Q5vyy7c8Z0rt2TWSDivM2xoC23qw3qiiPt1i_SZeMI3JvYGpIMh-c8ZauICKgo_UkS8kwQJSZI7GLS2xnUc_ONp6nqS9bdC0L2PxsILpVficDYeVSF9gw1280.png?ex=68ab0ae8&is=68a9b968&hm=ba79a275675cb3e6c2c495dbacfb6ba418ae62182692e2b21fd82b028cb576ce&",
+                    "https://cdn.discordapp.com/attachments/1408540975688716322/1408795888331264091/POKQSYB3tIsy5gy8mquOx8PoPInmpN3KDuh-Y2UKySrIRdWq-LhH0AbRa88TIryr5r_HxrdbpwxpmLKcnVRpYSLmymqB_wuOIHSZ-0DfPVvItJIMmW0kztCYlNyHT6ExAlOXcQTFVDwh2ed4AScswyMnzBT_hPsk1T9XF16YSZlJl2QHOVMrYgw1280.png?ex=68ab0ae9&is=68a9b969&hm=5b7aeaf28d004643bec8d017b72c128b2b8b6f1f00cf3550f28e3b334d176cab&"
+                ]
+            },
+            {
+                id: 31,
+                name: "Screaming Forest Poster (Some Came with Stickers)",
+                description: "Release date: November 26, 2021, Stock: Unknown ",
+                price: 35.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408797463590080623/LlmYOzubiFgw1wpw8rvQYgG96F3mZmjcyS0sf53tNwGNfQzyuzNdfScSHurdwfjyUUvh-39ylXLiwvHemo3OrwvWIyfW9Q1B87E2RY94mG6xqQRhdwZA-jQnuEdriErj5Mtjx-v4dww1280.png?ex=68ab0c61&is=68a9bae1&hm=6cb641e872fbb422441523e963a8c60701fc57ac618c6a32685ead8f7ef9b218&", 
+                ]
+            },
+            {
+                id: 32,
+                name: "2nd I <3 Haunted Mound Tee",
+                description: "Release date: December 31, 2021, Stock: Unknown ",
+                price: 35.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408798852101705828/3KubYM7eNQeTfbYb7dDPxWu2QfzEkhQaK9AJoRBV5HhLbauJ1Rv7zepKgiTzYo8DWuLU2uz6oseDSNaliUEkPwdRI2Hhq3Td254kw7rLTEp_-cmnGRkqUQ3b8g2v-3S5ughEGtOB9gw1280.png?ex=68ab0dac&is=68a9bc2c&hm=76050424bee76d3bbd9cfff4484ab3dcd491e5bf38af911058b0d7c219835bb0&", 
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408798856199798854/0edK4Ba_ZQxpDQJF4kwX5E0IN7OGFX-wL5_2MQjsqPkbtmH94RJxKpRWR5u14kpPXRafEv9z9unW4WRV7cyAho2nVR0l1oV_55a2QCujUsIwGZ415RcYTQ9VgLjmXVPX7K6LXQ46Cxow1280.png?ex=68ab0dad&is=68a9bc2d&hm=a11de853eb9933cfa270efa2ff53b7bf1acbc1d52e18a162e39dfd15d3d2bb7c&"
+                ]
+            },
+            {
+                id: 33,
+                name: "Skellingtons Hoodie",
+                description: "Release date: December 31, 2021, Stock: Unknown ",
+                price: 65.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408912849555689502/lktrKJrU0E3b9c2XLLxtqU5dsBKTUPPpwf_ArKk4Sfu0u71SPLAAPvfvxD44iu3CArydhZ8po7Q7X5jOhQTL5TwG4YwxlNQzgxKT0JlX-TgwQG15JpdGrGzNmnAJuTgRblFUQbKci5Ew1280.png?ex=68ab77d7&is=68aa2657&hm=da44e8ea409aa8060aca25e8f945ffc37d99e5f8936cc7afb38fe4f13a114bce&", 
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408912856224763945/mzmo9tEAdmxo609MDmDNHyAVmP1nwDqjth3ifiziJFP77RdEoCu_OuzCTYsaxYdiz7FO33FCkiiikLa4yJqCIAwXNLZWgkaAU6BvD_APClBmN0HeheAo0VcPvQaMsk_tkxz92bdjlsjGY6e261RTQL-yPUnJzwFIFga8dhL-0LgPNOqqIew4Nww1280.png?ex=68ab77d9&is=68aa2659&hm=badd723e1110198c17870d808eb761403cf78c3570df0da0a3f36df311c9a961&"
+                ]
+            },
+            {
+                id: 34,
+                name: "American Flag Harold Tee",
+                description: "Release date: December 31, 2021, Stock: Unknown ",
+                price: 40.00,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408913113943642253/hgupw9UgKxMcAS0fm1tMYe5fiJoDuEJSbar2FZm48YvCKO5OQ9JwVBA5703Vx2oAOo_Zyaxk4Vbn8FY6JX6LvodnwmllcrT6GCosoh4Lhf0TAr2nNygFzb8ykVCGb33TkQNSVDgRJqRmi7fikNpuPDbsV1iAHET1UzLmd_pGWXqng2mSNdqUFAw1280.png?ex=68ab7816&is=68aa2696&hm=d381f6b1fd88ffc97732cbfc78a331fc5614eaf40500a5d0c449546365bd1514&", 
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408913117525840022/hNDytg8kelN_A8-vev-jf2cLPDtVOOZ3v1mR1A1kj9JECzP--KrKJ-CLhQonBsEcN_48EzrT8-sbdkKlJAh6n7QkOxB9FtWshiPOWebHjSzvHypmbGQu6BajnSiMAXifXrOX7kc-6g8Vuci6uzxv5EVa6aUVqy-BIkc7DlomRA9KUgDr0d8bbAw1280.png?ex=68ab7817&is=68aa2697&hm=9e0110298e41747a6f2b3cc45075ffc78050c254d0a56c151fd6fce7960c3632&"
+                ]
+            },
+            {
+                id: 35,
+                name: "Screaming Forest CDs",
+                description: "Due to the fall out with JJ (Did the cover art) These were scrapped",
+                price: 0,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408913402092322836/jk5KUuvEYvBD6Q6Qahwhf39QVDWEOEswz0_5oM_OzeyR4pY2h3GCellViZy0oXEr2Gsn6D8XEZ0hmkKV7k7IwsKY5oivkDzbta0dCjOFr-i3aUeYlslyzrbRvXzr-H1LuNtgS-f8eo9mWGhvsIm1uv6Vhx_kPzTtaANaL3RlO5KmYCwUhk90Pgw1280.png?ex=68ab785b&is=68aa26db&hm=9d221cb450dff8131c6ae26c0c49a94d80deca810ef47a5e609a23c53a99a560&", 
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408913409981943828/NpzJagPo7FfrQp7SieaAcdH4RtE1gby-miCBHZX0Qb8Ne2kVR4yl6K27m5UOGOwgWq4drKeZDtdDOEA6AEFDpbrcNKUqfyDAtGyzGEMBsWt88Ph_B-BeC1x0ek-9LBjaRI5lQoEoI4Swi5T3t26DMHyrqznjOAQkXYfJmfsd6NSy92vNjV8rcgw1280.png?ex=68ab785d&is=68aa26dd&hm=1e8ce4ceecf0f986e5523217b23e17b6156c812900ca14aa0fcbdb11c6b8f962&",
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408913428835209227/cmjeZHgH2RWtzvIUwT6z9MaihuYxjK-ePsrW0vb9Vq0H8RvjjBmtcG1LV-mOhacpLl213aTRAh6B5cDephaX7qA0mGajmHKzx_xc3srje8_6fQrxK-MY3w-KdYD-aTktGgilGwFRehflTCeCFea4vbsgQCXZ0_6nKpsBAHPBX4gq5h6edB02_ww1280.png?ex=68ab7861&is=68aa26e1&hm=9f7676360bf0c6f5ea58ac6ecd890e2fef0cd7e68c65d6a9c5324fcf2f768bcf&",
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408913443532181676/7dXH2hXwsaW8XJxIJpPgg3wWVzpMosFHPIWmZd1v1KwnETtKlgDMv4jHb6bOvZJRHw_KnRSdf4E0edA4gSVTx85On3HT4cXlendHXBlspT3Pski8tDbl4HBa0Wc2C79uXLEvzVhbD9thcWz6jg4M-LQGVZbiee-wOAil9PRkQB-0kNRwRW7EOww1280.png?ex=68ab7865&is=68aa26e5&hm=5b21ed673bb1ad99b7fa26b63ba77ecc735c18acf53129d3aabe4f309055e14d&",
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408913456341581966/7DnSlwribFrUPL0HNKCQnl-vZxvjFMuxRL3TOPpB6a-z0VrFQu0iHORqgubZV_SiRVAONAXDN5_E9FNuShg0GJagr_hiNf8m50JVnWkHN3OTUC8a5u8GxCKtlnd4oNTpqI1Mu_vRE8RcCJgzNDVD6KuCLN2HqS1TA_j9lwnj_A3VYJhm1feJYQw1280.png?ex=68ab7868&is=68aa26e8&hm=b72c781c931d491a590dd4773ec2774b6c6bdfce0afa9665f7edff5a0995af39&"
+                ]
+            },
+            {
+                id: 36,
+                name: "White Harold Button Up",
+                description: "Release date: December 31, 2021, Stock: Unknown ",
+                price: 0,
+                year: 2021,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408915001007149188/hBX9pNkOpAtDNHxJ9oFIv2YX3ZGnI-JKYdwNarnu0KB-8pCz9TVbT3ISRG7uItPD2OJZAQ1tQcolid97m4MboF5hP3fnY_-vONtRbwDA-DbbP6ShNo6ia_3BCJrIK7G2YO5nCbuV6ifjIUZgZ9EylkCehup9SQGl-ZjP1VAmYvpmi3E807ChqAw1280.png?ex=68ab79d8&is=68aa2858&hm=1e7997617bf8330f08cf2566ca10f19b05e2229b423f288afb80ef271723af80&", 
+                
+                ]
+            },
+            {
+                id: 37,
+                name: "3rd I <3 Haunted Mound Tee",
+                description: "Release date: May 13, 2022, Stock: Unknown ",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408916888213520577/WVnBoSdTlbk_OS8H-iMwU7gWUhQT5OEMMAlkLuZyvCuprUEf9YHS8PNEJIZvJeKr-sWm11IZutIlL8g6RnTdNYHemI0wDmbwiQiHjtAdvUVKres26xd_R3DRtOakO06kayPxZ47eP9kw1280.png?ex=68ab7b9a&is=68aa2a1a&hm=389a119efa10e14eaa41c578210f20e94687b2f3bd866fca1b64fe8f6a367b82&", 
+                        "https://cdn.discordapp.com/attachments/1408540975688716322/1408916895742164992/1ya_ga27NQxOtUOe_9YnhqSGe-ylYdiZy-m0LLBDl_YqQTv75gNTeIyeg4_1dFNQdi4XV08349_HtApc8T8BmBb_2tcfLTdekY8eiPuXySxj-h5O6JQkMeq5iA-_30NfQUlDBFmY4jIw1280.png?ex=68ab7b9c&is=68aa2a1c&hm=3c76eba4234aa29c44270c7ccb466ba25e6031e0d9896f714764a70580b32f4c&"
+                
+                ]
+            },
+            {
+                id: 38,
+                name: "Hauntaholics Tee",
+                description: "Release date: May 13, 2022, Stock: Unknown ",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408919759155761323/fiv4dh7icHQTcE-acIaU88YgMfmVwk6_gROLYEtji7gJh6NQ56uWS9BZ4QCiVS7mWkjvJ6Nzn_2d41r1_28-lunkRYHTSCcmXQDrAHvU2X_OLJuQtzw7S2xgRyg_VoWlqQAjdAPhkSQw1280.png?ex=68ab7e47&is=68aa2cc7&hm=d42bf355ce10394f45f666e7ed808e3190b46e2b0a947e97565c20c8da20ce4a&", 
+                        "https://cdn.discordapp.com/attachments/1408540975688716322/1408919768261722152/Ij5Yc-TNk9HVACSjaPyNa3B5YLoEQcfM9NWoydlZZw6C_r4J5kl367TVrqUR9i9mhmFXn6SOcD27TtVHzBUGoz45JqBvDdlxq4aMDeeu0sk3tmaiYpZ0HVV8zQtj-t0fIwM68udtWe0w1280.png?ex=68ab7e49&is=68aa2cc9&hm=2e09680e2f6819844de3fd623e43a8dcb699db65f5c45c0ea464995c1d724823&"
+                
+                ]
+            },
+            {
+                id: 39,
+                name: "3rd Skellingtons Tee",
+                description: "Release date: May 13, 2022, Stock: Unknown ",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408920770171899994/oej4e2Jw3WCyVmslG4QuNyDKBdeczZ61wvLqVOvMkxHoRJ2QIfY8WdhNiMOvJ4aHtnTMYlBCPaIm_sbDuMLB-ofiupDsFimSKQmAsgIsshF4NHChThXVloIhxUY_7z_JArwqRDtLQPEw1280.png?ex=68ab7f38&is=68aa2db8&hm=52608306856363fb58a9ebc3f540d52d23fad205e2ec93b33f6032893a3b24b9&", 
+                        "https://cdn.discordapp.com/attachments/1408540975688716322/1408920782515601419/3y3yFQNlbg_lo1O1JBQaO4upP5-SPSpp03ZfiLXzqY-Xy9IPK9Y-j9IhMqeP5FfmIq0yZCMpx73rmax0fsIdd2XXOEC4CBqEk9VwrGBubV3VZKNTo2oIf4w3RYew4WoF1S5e0TgM3zAi6UAkMEjjS2xybRgiGXoQzKGDfon1SW0_AcifHIfC_Qw1280.png?ex=68ab7f3b&is=68aa2dbb&hm=7a8ff585b05139f9b2d49f414cca94462d1fa8167539df8b834258b721e76ccd&"
+                
+                ]
+            },
+            {
+                id: 40,
+                name: "USA I <3 Haunted Mound",
+                description: "Release date: May 13, 2022, Stock: Unknown",
+                price: 45.00,
+                year: 2022,
+                images: ["https://cdn.discordapp.com/attachments/1408540975688716322/1408921847034019930/NXSSGE7jb_7pANZSzyGF2RZ1y597VwQfL6ktBqoCd7QhgSwRvKj-wYVPvF6y0ZSwGUKF3iaSffYE4-kLg_RPANKlmDxNRZVMfvvXThOKyPvdzvHNDs-69vcQEmDHv0PS3ZUXY2255bUw1280.png?ex=68ab8038&is=68aa2eb8&hm=c20987c73e558c69a9990cd1131acaa69c809c7b9ac43eef9d729399aae072be&", 
+                        "https://cdn.discordapp.com/attachments/1408540975688716322/1408921863844921415/t19IZkzoBZq1LnlqaMdSagb1ONQQp8Qoj7NJ0QNF3YHSxbcIOH4_129RP6iRIinNLpYpNP5i-vzyBvfMOOTwvXONkSTEF6tbfe6WrzqmjeSjClghPp1K97XQZq72nwd_c1T1sCiba4Ew1280.png?ex=68ab803c&is=68aa2ebc&hm=8455f272f881678ed8dca762d09628e0f166cf49d6979249c0c95132c9d229f1&" ]
+            },
+            {
+                id: 50,
+                name: "RB3 Classic Long Sleeve (New Blank)",
+                description: "Release date: May 13, 2022, Stock: Unknown",
+                price: 65.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408922181571969044/xmOlhwWQAgOY6uMciC-ZgymJXXFEKU1_THKmInq0zJo3wL5Fb7BNUpdbDh-0srXNhW3UQcTJSLdjPjBsj39Kk7K-B_xh_PuTcT81qx_kEami23WSRAsAkB6HolU8EB973u57P_j_rv32rZHvVEntHbQNaU0FK39USSUCZZjZDXFLZT3R4czqRQw1280.png?ex=68ab8088&is=68aa2f08&hm=9317e46375ddf1a7d3a62807c16169a4eae9a5ae5f1b5ee76fb6f149867a01f0&",
+                           "https://cdn.discordapp.com/attachments/1408540975688716322/1408922186982625451/7Oi0mmbEUhd1Xgz8xwoIAdP-KvRqPGd9uuBgVoMrc97e_qnI0dWRodwh_eUtpQuqKAVPe4xydQZgwARbTLXcPtrYXJE355AgfNLBAX42mLe77yViL2gRMvtY8dt5kGoe3HnjyHpNJ83kDG7HKSwXJ_e0Uhik4LdAglkAXfcvAHRt-NfYw2xedQw1280.png?ex=68ab8089&is=68aa2f09&hm=49d8f0815184c69c31a53eb874477bf4ce8df30636c4d705f994b6c45f4c66a7&"
+                ]
+            },
+            {
+                id: 51,
+                name: "Pride I <3 Haunted Mound",
+                description: "Release date: June 24, 2022, Stock: Unknown",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408922530357448815/u8QrLeua6Wme0IRbgFX1b5FADictER93H-LSaPtQN3eodjdOgxJGav5fzMXUIlbMayasWXxdzytsrOJ-uWkWbR3v1sLzOPyz-Lsz6rWfm8gx96X6CoxEkVv-qQNByZINcw0pFEDmojEw1280.png?ex=68ab80db&is=68aa2f5b&hm=45f456b5489fc7da51e911f02383a40d7d1ca3771fb19edccfee91d59ac4c745&",
+                            "https://cdn.discordapp.com/attachments/1408540975688716322/1408922541086609462/O_rruSBU1-7YiWNIxnic0CIxPdMzWN1RoNjqIlBXr_ACuBM0hebDbQiAaxKM2-LKkMcXu103IC80Oy6jHrEsAH4DhM6v8OwJa3DsUgf3iAneQODA_SgZ0hSk93RZVwEGHnwtst8_0Xcw1280.png?ex=68ab80de&is=68aa2f5e&hm=0cceea7b836567f646889456f6e55a54898e6d229294d4404c25a4bc79689fc4&"
+                ]
+            },
+            {
+                id: 52,
+                name: "Turnabout USA Tee",
+                description: "Release date: July 29, 2022, Stock: Unknown",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408922976207900693/RPUo1Sp9RfmwTOnmh7Bc8a3SGYguHsLdn4Dk5XiX5Wi9Xp1eRpSMhP3OGrmqeikDoQJo7yipzwPi4-tfj4780OlhSLKScW1T8T2RMn3NEtmY3zrX310T9_nd5f9W7VkGHne6MrX4rM0w1280.png?ex=68ab8146&is=68aa2fc6&hm=ff491c73a32b39b0b7fd50df05ec94a59aadeaa74f088f7a59610c9faebbc741&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408922982604210317/WrW-dUSBMt73bzjX2aXCJDt0VOnd_Y5agbegBa2gonyJAg5s6PAVsMliplHtvHlYOhFaPDK7YsI4pfxzR5f1z9XQwBDoXW8zS-K27mEfRcsK40t1tu73M3XGrI1weo_kc_-JhK0yQdEw1280.png?ex=68ab8147&is=68aa2fc7&hm=14fda64ce029c288466d078713e5583e337a1a07e26695cf0790e0a8861acd25&"
+                ]
+            },
+            {
+                id: 53,
+                name: "Turnabout Cutter Lane Tee",
+                description: "Release date: July 29, 2022, Stock: Unknown",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408923388403253288/dP8C7-AcCmy5ROG5by6Bus4GtwGNDFEytjxmO0C2BDHJgx2WBWIH9m9mElRgixHKsOMToyRwVEamZBtQpujMTY670gmkoTM9lOUE81oWSNZeEGjwjG78QJhLM6qPV-r5zjMun3KjpE0w1280.png?ex=68ab81a8&is=68aa3028&hm=aba07c3df68ee8dab4655a880f35bd984a567704501300f4d7ee35a6730f0cc7&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408923395545895052/VMk5NhuRv0rTIISUolUtTd2FP_TIvJ0NuOkG7hBESCntp4UOIGw49QEITbIDyynhKae8od5QeX05KdvouyFzgG7OhKin1RoBQ0b_zF8qmd-EPK_unCfSpwKjPGRKan7nYaJnIaiIaIw1280.png?ex=68ab81aa&is=68aa302a&hm=0b5be7260677c9e680f4e9fa5911744727575b7710c074b7635ff330c3cb6678&"
+                ]
+            },
+            {
+                id: 54,
+                name: "Turnabout Til Death Tee",
+                description: "Release date: July 29, 2022, Stock: Unknown",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408923583660687471/QzkUfiE4w4NC8SDcMKwDkc4Qe1yDmDnDu69M6jmISLgX7mZenFlEzXGI0I5rnASyvz24Usn-kc83nVjp-gaNNGohDW8vbz7-s3o9_jVfLVty89gc8wGSMFKU8n8XSL4ilkq8UoeymUww1280.png?ex=68ab81d6&is=68aa3056&hm=34c400e891b79f008f4d3fe3811b7d7be63b4830b4b4216f3046e0adeda8df6b&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408923587892740146/c7Pr0Fm_BJ878wXBBJBT3JDS1haeOy-8d4GC3PsLw8D3wK-acy3ML6mq7G2jJR5d4I5-v8zAFqSvL2cHjpeEKnGETUKMD0naXfi9R9TDshtcJhf8SAxj8sRNO2HXab-fuBOh6ZX_7D0w1280.png?ex=68ab81d7&is=68aa3057&hm=fb33dec263883ca8ec0a8580743ce2f4611eadd5cd1adb3149cbe90951c4577c&"
+                ]
+            },
+            {
+                id: 55,
+                name: "Oakland Tee",
+                description: "Release date: August 21, 2022, Sold online after the Oakland concert got cancelled.",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408923877588996146/lY5iTqB3Uy88sPXTm_ghZ4LYGNYsGGYyXXy9RWKpIcfxfSNEe2lrhVnQ1SCsUElwXb_WXOfU4C7udFK62CuYXqAZnCyzhYsk2g_I4olq2ktq_mjM8YupAjjxXxxf_lR6R6gBvp5CZZgw1280.png?ex=68ab821c&is=68aa309c&hm=59ea1f57988892e50b37fd4f60513e2ee739693b6a0b30afe1a37f19df7e9718&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408923886954741801/JWuCK2cBfG6LswDDRYBXCCyc0d03eNE76EoEBOMa_U_6MQpBzvJhcVIGctMavwtAOnctmkQrl-f6YreECD0EWFO16QqKLm5Pl0AL8jLCyD_02yIIbJN1Yby9O5vaclCuJKHUJydaRCcw1280.png?ex=68ab821f&is=68aa309f&hm=dcb28465a25502e75e6d367b10054137a4569ae69fff1c3887bf8e1b267574a4&"
+                ]
+            },
+            {
+                id: 56,
+                name: "Oakland I <3 Haunted Mound Tee",
+                description: "Release date: August 21, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408924221811458058/5S6kImUeIKCAJwDcL6zlsbRJMYn2dDO9FvCAV-2rz6d_TYj824frxYFzv1LomUKSpQqtXLLB8iMyYX8DfP0IieYOZMrkRf_F_KtOP4QuQtaHJTQqSvmYalj1wFOJrFoU-n60VKPMuGww1280.png?ex=68ab826f&is=68aa30ef&hm=b67b214c15d5915c2674bac760984a4bbefafa1f982f82db1dd2531ccfaab643&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408924227557396540/UmE0629DIyTvpGFuqPF3vH_D-CdcFTmtB1yT3HIFyYPMXIa-fV_uysQdvj2l7Ey_YmEWDp8GIxludBN2mppPNIyB9S8-KSRXF046szrGKPfRDBOIQULMWr3haE6aD0PiWaLXdi5MOtcw1280.png?ex=68ab8270&is=68aa30f0&hm=7f52a376a325de01a50cf6771a76d673b9e8a8e54fbc32f172f650e34a35d15b&"
+                ]
+            },
+            {
+                id: 57,
+                name: "Oakland Skellingtons Hoodie",
+                description: "Release date: August 21, 2022, Stock: Unknown",
+                price: 70.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408924432516513924/oCC2ObsD5RepgdOpsL9MJ_drdqvgowuMYO3rZiAHBBEvUZWqa6_q-hfxB1WlIw0T-Ch3ea2OWvluVkNHe2iW-uPuIBbI_w4toefZx_70fWUeZDm2A7YK8EMT6CHrPNFq2zSVzZLX4AEw1280.png?ex=68ab82a1&is=68aa3121&hm=ce6b3174e680aef9d46d5b8fdb2e89eefff496ded4258760a5acf40c8cc54ce6&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408924441789988975/6OULV-noV1XSuZXAcaffiGBf8J0b2p6j246SWboQcY-34GokP7ZgiG8GDSwapFT-6o65aeFRN9AP-Lme_iSYCGhaQrTA6fHAv-xNFyaP2_WkSm1zgw0F9qwcPigK3OKj3UWXgdd1ApU0OiajCw71z8pAZKsDjOHHi2PeNJy2NZQVkvnB0ZuTtAw1280.png?ex=68ab82a3&is=68aa3123&hm=01f6df8070653e1d015ee81a255a200f4571bd4b0afde3edbd170192426ae639&"
+                ] 
+            },
+            {
+                id: 58,
+                name: "Oakland Long Sleeve",
+                description: "Release date: August 21, 2022, Stock: Unknown",
+                price: 65.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408924588192043088/JzBUyF1EpEFGwuMGXGWLdUA_sXn7X3lYHd_G6NK2ggsyOQ3aCMCDbeCiYrmO2cnp02kWB1XZe-G6QvHqDMpk5t82KTRRHdiLntIOSRE7IU5tBKsYrU86g6mApShxk887ziwqAbePXfYw1280.png?ex=68ab82c6&is=68aa3146&hm=2af31d66aafd652995b25d9779c43da8f7e18720212ef47d0e57d4af08d40cf9&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408924601681055894/tT4iTIwiRmA4Nd4YRTUfXjy8bnBRPlyb1KeE39mLtYHhPJMSK4VD9K9y3kOawJpO82JmjvFF7b4gWuepj1TiCleU8gE7eCmbl4ZdNijdkqDJVD8I22UeCIuXu9uKp_iCv2O9-fiJoAwyHvnfJzakFIqw8BrQxkD8d9l1r2ufIDAuuOSbzb65Ugw1280.png?ex=68ab82c9&is=68aa3149&hm=5b1c957631440924e8b2f7fa500adf1b0b8229cf43d47301a48d21ac1056a0d4&"
+                ]
+            },
+            {
+                id: 59,
+                name: "LA First Show Tee",
+                description: "Release date: September 10, 2022, Sold at the show with extras being posted online September 16",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408924839867060304/Maq4-xOa55kpEAV39AuUiuGU0NY_rP_qbLUJGHLVJcVWvdg_aERpLqX7t1J0KktMD3IwClu9RtV6xNAZyC3lxqv9yFfaAdyQVI5q9hBqpiRziXVHkORxddEzwW4eJKel3DP0DSBRSaIw1280.png?ex=68ab8302&is=68aa3182&hm=a5fad84cc90f1aaef809e66fe1be07da64a0d7ea58d699404365aa54cd1b51bb&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408924844153765959/nJYAF-QKYOaILsdlnAJRrtdWuza8wOb9ayqID9q09_UR6MtztYX0y4fNYdEXTYxYrRmb88di-yFSmpLpvn0qyTB1pOJSapOz70Df9nbBx6tAR-cwHQ5Y3Q0lSTwNH4VSC8vGTcbcIg4w1280.png?ex=68ab8303&is=68aa3183&hm=23cf395f16f7f9bd3311e3efed982e01c06b94c9a48c050775b5d14917480d4d&"
+                ]
+            },
+            {
+                id: 60,
+                name: "LA I <3 Haunted Mound Tee",
+                description: "Release date: September 10, 2022, Sold at the show with extras being posted online September 16",
+                price: 45.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408926892932730992/5S6kImUeIKCAJwDcL6zlsbRJMYn2dDO9FvCAV-2rz6d_TYj824frxYFzv1LomUKSpQqtXLLB8iMyYX8DfP0IieYOZMrkRf_F_KtOP4QuQtaHJTQqSvmYalj1wFOJrFoU-n60VKPMuGww1280.png?ex=68ab84eb&is=68aa336b&hm=1893bbd9abafb0df500f91c5bf0285abcaa338c864a0479a264d141206b0298d&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408926920514732123/Ao4ZDzltF_Jpmj4l_shDFIHsuA0PI5v3Tj8wwRqxTtdFRDkas1papmAcVhjMvo_Cz1ARImBVNvTlS9Piq9CsyUmLBKi4RxB1WKc_f800n2erKH1r0PX__tSP5FHDu9fkuNT4DrRHrJkw1280.png?ex=68ab84f2&is=68aa3372&hm=668807a8d844ec7a63ff5361aa2527ce165dcfdc22b4c82de4a5b411b9254ac2&"
+                ]
+            },
+            {
+                id: 61,
+                name: "LA Long Sleeve",
+                description: "Release date: September 10, 2022, Sold at the show with extras being posted online September 16",
+                price: 70.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408927028358680616/SSi63E7ZD0ykn0fmzyKgiOurKALvZbiHYOKz_AynW4iX2B8QGLsefohZ8hL7OIGVB-fvy4cExJkHoTWQlp_a69HIobGs70fIWiBrrwlfLkxnuJqpBvuTLFh65siyf6kTndf6OqF96ycw1280.png?ex=68ab850c&is=68aa338c&hm=2bb5822b415f0cdca685b82e2909175eef41dfbe67776f483f4a19cac3294ba3&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408927034905858198/Qf4PGbsXOl1D5B02nZBfuKOtUuwnjbgYVIqMoruwCIcuV8n4sh7drOqrTGPr6OYocGMeUgolVFFNDm5Ox3EKaEgvbaXwPDMT-EaVdnzhXafgtTMrcOnev-xwygvBpKsHHinOasN6X5Ew1280.png?ex=68ab850d&is=68aa338d&hm=51270927d54c566a8cb162c60c887b37b382e574d1534441a86896d614cf1ac5&"
+                ]
+            },
+            {
+                id: 62,
+                name: "LA Harold Chains",
+                description: "Release date: September 10, 2022, Smaller than the first run of harold chains. No extras online",
+                price: 100.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408927236526178344/ZOKGjB42BAiTiXfIC11qfBP_agj8Gm5F_qO2yMTe8YmzH311Hp2d-jgCqzKY_L2sPGHpN9oKtc7wzZLkqKhQkleQfcG0m_eVAfgIAitTy9qP1ExpgN1bEs7eE7_-gEs7i0fQ2PNP1Xg65mdLclFTsefTwD47nT6O7QNMSu3-Nj9G-GQZTXLUTgw1280.png?ex=68ab853d&is=68aa33bd&hm=91f222a6592d3531f327d51d6191c5cb2ba7cbe3d0cc1a99d5665c4ef00b3213&"
+                ]
+            },
+            {
+                id: 63,
+                name: "Black Gunsmith Tee",
+                description: "Release date: November 11, 2022, First drop to have printed tags",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408927605985513542/Ldo6RqemSq9Vzmjw_FFPAXyQiA_hIi8Q-Ce4UKg9lDq32WU2kCb51CZoZ2hhLc3UQ80EdYwLjxyifY8i7yA_6stS-4WAp7jCWNTle99144Ypp3XJfwM551B3NqotCgeA7ZSmKN4eEtgw1280.png?ex=68ab8595&is=68aa3415&hm=30f053fea2694cc27bc250cd34ea67b12c64bc92051dff066fe59896fc509e23&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408927610582601738/Jax5kXuCA5bmXhRQ92AqUQJdiSnW-Q0fm8i51Jobu6SbBYkrKBum4Kc4c89yFS6_pFx8FT3k7J-CG3dIYZ7NFAs-OpajEh1fs1E7lUgrLivYYpNt67NrcF8ZfZZBlkmHydttWQOgI6cw1280.png?ex=68ab8596&is=68aa3416&hm=0995879ccf55d00c9c0f95e6117cd99b34e3d95c5e71aa54e32a2847882c8094&"
+                ]
+            },
+            {
+                id: 64,
+                name: "Gray Gunsmith Tee",
+                description: "Release date: November 11, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408928184245817395/LB1_jBntCIvu9hp6ZZNdD494bAzTwksJtaZZRrApD7WmFZgBEbUrV4ti9sJ-DnNAkOH3ZKahCpkSZzoAiYKfu1GyUZpNpb-uV73B7SlceTKiHSB0uOpNQnbG-oqkXZTt_eUCD5ioPZww1280.png?ex=68ab861f&is=68aa349f&hm=b38eea740709aa6802efb43b664e1a9350e192f85b9afc66a7648dfa48b8d5d5&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408928187156664420/mf5uXEG2kRbEULObwxEuylrGWD3iaodcY-4Za0veU6IUwRgZBIkFSV6xE_8-ecp0gBpCeW0oSGkR2bh8k0EeOFLUu-v5f5jVAzdqB_3c8Xk_ora6Zwn7vC9v3baIqH68m1x7Y7Wdr54w1280.png?ex=68ab8620&is=68aa34a0&hm=037be909e7a955f0a37dc857f5143f0973c569bacb1b58bd7dc9335b09cf7d6e&"
+                ]
+            },
+            {
+                id: 65,
+                name: "Hackle Tee",
+                description: "Release date: November 11, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408928301375946752/SXaVIu-_AuzoByWOg6D86f91xt5O9vX3B6KQ450RZamQrNwTs7DcHHb_noD4yzrB7Pxp9Fs4tY_G4IHWDz86_JiC3f7_FMcmSfxHpP4bRqcL3psTPDo35wp6EzTV0G0OuX6MdtmVMagw1280.png?ex=68ab863b&is=68aa34bb&hm=451df44b80fdb7d8d1a7d6aa92c13a6ccb34dc203d41a23b902c4c511495874a&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408928310087389214/jeeKK5fWriNQ42s4iJc-WOm_mMjL_DAOrgPr0Zqb9U2OqQ87rcohQxXqAzjXP0fDlKjh8UqdFRthdiBPasisq-o0MFptXZ-1Es2aUyn27zwLxG9wC8BwIaf7ohL2CV-6IYD0iJs6TCQw1280.png?ex=68ab863d&is=68aa34bd&hm=bb66eb7e21278b6e96df083e77b7d05b9062f8c0af4e0b1e0008945c0df3dc4e&"
+                ]
+            },   
+            {
+                id: 66,
+                name: "HDOE Tee",
+                description: "Release date: November 11, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408928914973397042/FdK21UNikUEbYQGeM5zdfpE4Jwv6S3XUNi35QmPHo_oio_adAdlAfxgHO4aFsA8wrYKMoK97RAyrg50x2SCviEw5KCCTPjHzAGQmEOHNOxh4lHrQP5L6FtrAF6GSP6OQbofUW6xqrvkw1280.png?ex=68ab86cd&is=68aa354d&hm=9016555e663db1dc7ba986ece82af5a9e068a63c307a9955d4e9025a456ddf8e&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408928919310172276/yzx_T01mdgurHfmkexm7W6EGMzCIfn4jbv4et4CEiT6IoJ8M0MOvKgm78ox3CNKPyqI0PQ1TIjm8p8qKf2ePSxahlAogFCBh0Z9vG5aXFcqBXLafPFicOo6KMZppkzWZ8ngZZCpNw1280.png?ex=68ab86ce&is=68aa354e&hm=230ed4c9e2a782e826d01a62200564a514b57143afbde48e6f362b96cedb6fff&"
+                ]
+            },      
+            {
+                id: 67,
+                name: "4th I <3 Haunted Mound ",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408929117390245969/AvSffHidE4oErcmOHcNwezYmZvZFleH4uFzh_sqHaACWTjpADnDYkpixhTqmtjcwWXGnH4tcsulH8aBdr6tlXq5xDYUGYMGHEkhozyEozkUTAiU03S9dhKnEeq5yQIVDnaKOZ52NDRHxdbQWKuJ88WB52sfdJuj03D8BSqObXJbrGj09WQwUGQw1280.png?ex=68ab86fe&is=68aa357e&hm=633b3c82d4d01f97baa60de3fd38ff01fc10410c99b424b4fc1c840828932f8e&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408929130145251539/WaeNIII47zRnhS74iA5KEYUeBhCpGz9S8imlf1zjwiz3EvxJwQQkuBDvoIjcb0FWiHLNUGlLT-yw8GyE0YcSBApyq2L5H_O-lx4tjWO4_pxfKVkKnUAjD3fUXMtx8O-0NykVP_p75YeMXt_Q7ut6IdQ5mm_PfFNOtt4l8-ztpszdiaDxJ2gxWww1280.png?ex=68ab8701&is=68aa3581&hm=f2a6cff468000b2e3e81d71d0a9bd0d89f9eb1c13b56b9457f23769f77a9dbea&"
+                ]
+            },   
+            {
+                id: 68,
+                name: "White I <3 Haunted Mound Tee",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408929361423499427/frQn5a_HsX2h8sSztq4wHatOcVH_eZCnqili6LFRLeWtrSsTCYMNAh7FSWePSGtnXn6bboVNzMvmbzTMlG0p1ZCa3c40synhjVAYq8enDIXKSMPaLHTpAwwDjRXOXjegbahlWpyceF6EYsDRexXuIuAy2xqfB_zi-NuFXybVQYMtqdwJHM_EUAw1280.png?ex=68ab8738&is=68aa35b8&hm=40350895402363c5c8dc659e7db5c39153cbd97135a2f3381361cc8d6dda9c83&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408929372248735907/0lNXvZJvVYKvcYDJdIcosrQPX0144yXfR91OicT_dbj4B66w0AyrzjcZgWiR6V8rbmv52xtPHjPSiBjzEpP97LzfMDnAq_RXmF-mjhPSrFBJfvNHywdEbiS66gCKXoGAd2h5LzMkQKN4-2EAHVLGW4jhd1W7oi-Z4JAigef5Oyd3raBszHrupQw1280.png?ex=68ab873a&is=68aa35ba&hm=1fc158149828d756aabafa8a25c3534fb4b753b7e996bd7674115aea0e9e8fe6&"
+                ]
+            },   
+            {
+                id: 69,
+                name: "Red Skellingtons Hoodie",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 70.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408930196027080847/h6Y87R3bjcD5dU32Z6OsYBc0Hzzzbhf0gOARUc5u02dBe7bjFTofOappM_yKxjw5HUH2UJJ299_u2xsv-I73fFauhuTecK16WSSgRokwXoIvlgtKAUMMXBx3MNdwFio_iZXCIBciscWW97HH50GhYWahTsuZU0Nd1fhOryBpWGACqNmVZPoEaQw1280.png?ex=68ab87ff&is=68aa367f&hm=cf341e9a3f74bcd806a55aa3de4cb5dfc9bb87245b90e4dbeb9803e7c0b9df11&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408930201999773817/ETRte0zmf1tlsEjTVoRjEHHu9r6QzjBP1xiVsU5PnJABmscn8oi_b_fyUtoH2TYeSA7ElDW8KfckI52p6B987-1ZmfEworwRDqAy2FqCaj5XfOlufaqQBH6KNI9-Chek8_xOjuIk-5Fk3lwQJj-Ted6Yo0I4YHNdQIlpcqTCzRV0IQ94aqkNw1280.png?ex=68ab8800&is=68aa3680&hm=eda10a2a497e3f1049b485b133aae6ab67c470d1f57e61a0fed4b4ede605e5df&"
+                ]
+            },
+            {
+                id: 70,
+                name: "White Skellingtons Hoodie",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 70.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408929981504946320/cKjAbzFAonS02jaL1U01a0Jw0UxrZTf1IeiRUHU13UadsMUC3gxMtl9LavRbirxwxIdND3nFo3SWcQTp9de9_EroDcYmLjE9DHmiJdJ0blWGmLBMYMa36jvEfX_d3lnNmR-ra0HWQU9uz2h7QiNm6lbP_Lf8o4dH6TQl_qunDcg9lFlF6dB7HQw1280.png?ex=68ab87cc&is=68aa364c&hm=2b00e12f2b4fdb4239d34f4ed20453e02ab17c0d04c1c192b58af77141c5b77a&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408929991739047946/Mc0vHphxKKB7tG_b6Xd1TKzB3nsuKSumW1V3iqBUiGD2SeD-aN8DU6kXJ74P_CcJNPV0hPMaeEWkCFpLDJ0w7lJGJfFsQDI3Hguw57bf421EcXUDkbquq-DCsHeMEczjFv0jfPkF1nPJ2Sfkj42DFKiaOAgF7NfWN38PByliORfKrVdVw28gAww1280.png?ex=68ab87ce&is=68aa364e&hm=8246e364a2b3898e2cbd0c5d75a63a58c916d2de29479e8f86c5af9f5b91a349&"
+                ]
+            },
+            {
+                id: 71,
+                name: "Haunted Mound Reapers Tee",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408930392802852934/HT7vh-iCqZGo517Fo-RZk2dRPq-Er2EE0aC-34lzd4soFecievhyDj8Irg1H1hgkQu06u6ZYObEoUPKA1skQUC5vli1A_lnGRMvJdbXaP1vlVruXDUlLogcsPOnUg-0lguaYaHwyoqJrXVjYZilBVsMlaIigMpfRo1CGigdVQGzvS14w456k8gw1280.png?ex=68ab882e&is=68aa36ae&hm=b3578712e30a413f60b3a716ae06d59e6d6ed34752a7edc58be293ae9784e0bd&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408930397470982286/351nILDh_Ye2ZlMnkRp0gz2piSykyW3BlGgvpXbFTqfaOwy2ApSzIO408yDu2DEkO3V1gukonTbWeB_K5jZFTyF-y5xiejY1V2vYxxx4Gqcy_NTEEDzPqEWe0_4KZORUy-CCNcdDbqdhFYWQhw0juhS6D2oYQnSSCllcjGLtpAGcB8k5atF1agw1280.png?ex=68ab882f&is=68aa36af&hm=7a707a49859a914d905f2fb5c0557de71c51f15c09eadba501232b07a32b0e69&"
+                ]
+            },
+            {
+                id: 72,
+                name: "2nd Hauntaholic Tee",
+                description: "Release date: December 16, 2022, Stock: Unknown",
+                price: 40.00,
+                year: 2022,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408931847919898665/UX03bcl_zM1S-MYGiI5VpIp_TeQ684wzKED-H4yDazT8qnKxoCocq9zPZr7WmJ6C9HWFnjSGUZuWHy6dsxURABraUW4V7aDTBTLUHyYHg-dqNFUkKm_kC3CxxG9kjvTyj3gfxzPYX4DiYJ2NnBqA4EFRB3Grt6fFdxYpv6NZnFDTiIYOOtNIQgw1280.png?ex=68ab8989&is=68aa3809&hm=8ff87b5b9fc19d24f7fdb4b5cd0c1e3926f31816ab369a93099dffe55fb8ec58&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408931864995041350/nJnobnlXt6FI53afBbAUTCFtmNUZ1Ki3zuAFWluEePhVvO4bOqNdlk3T-bwHV8qWv64_gDPaYwx3xdbu-MeK3lqMw0UpTTxayZmDzOVvT6NJq1wvQD-YpI3WBUNOz84EKR3lsS6g29VEePeOXE4n44nsvfUpy9E_fqc9DrKcNKn6E5B_KPatVww1280.png?ex=68ab898d&is=68aa380d&hm=fbd5e8098b2e22d156987ebebf19d8783a9c6d2107af295b7f2c5d7a0258cd99&"
+                ]
+            },
+            {
+                id: 73,
+                name: "Tour I <3 Haunted Mound Tee",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408971408620654730/HDYY2Z-EechP1MNUqGXQIjQlgL_us_-ZKFArr6lnvnjoiJi47DstdMsYXRiHGoKi1Mw5YcsodagJWu16VurosmiHeCzTvK0CMjIXNS7OBwh8rJWLiMXX1EIUJAvUCK00quAGJmchxdsw1280.png?ex=68abae61&is=68aa5ce1&hm=24e1ce779edda0040ca3b5e485a5dd3420e1554c0448d8aa2172ebd902727f54&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408971417361584128/XH26LazIbWuAq4QeM4MnLaCDEdoQdGvObKBG8QNNvsY0YFw8jqM3iHPq0h-e6Jx1vIOtvnGTODFNzNjB82L6kgbTpfehj7NnfbAaQPFSjCAuJeBhz-evXLxlczL_x9biCTIa1NttXgw1280.png?ex=68abae63&is=68aa5ce3&hm=90d83c596740da312af8363dc3d9c3d75a0012c79409807c4b710d236ff67b34&"
+                ]
+            },
+            {
+                id: 74,
+                name: "Tour Hoodie",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 70.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408971432603549766/MNkiE-UDy_qTWYywR77i5kLf2FYo9L3I8VHxG_HoSB1uDtdD-15ifS99Jz2apHYmSU5Udl6CCMo0EgVOg6Jx_XYm_DGevtAwFGa-r4pdkIBOloKyDmjvSWr28fBICUBODanx-i2xXoQw1280.png?ex=68abae66&is=68aa5ce6&hm=05812e53403bc6ca9a11942fc1d4a6a51e280746ff719d14186057551d77ffc0&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408971441764040724/DJ0nRKNL037vCrnGjwXmJ74aPN5xZ1s1OHaXpdZwGjC81xzvfHTVosHqGTajonFD6QnVqT7CByXjTK-BN7h-GggXlSuXuHBL6LqutzhRbUC3jXUz1yPtA14Z6d0h61IVlKEGhEWiEY4w1280.png?ex=68abae69&is=68aa5ce9&hm=772f5a808315d583316d6cef73bbf495950ab914e2814f94906a34931e56832e&"
+                ]
+            },
+            {
+                id: 75,
+                name: "Tour Long Sleeve",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 60.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408971983944679514/OiYXi8v60dZPI_I71Z_svUxdqb-3ic5DcWTzAwW6zMAUEE7vikQo0z7HoAQkVJdVy0deidqqph9DlXaDSH_vEo3MOLz2DP0USlsq8fpgqZ4d6_o8JDCscLSjcee5gTbINIaGP7ytXCYw1280.png?ex=68abaeea&is=68aa5d6a&hm=221d4b3163a2a69fd1023d759279423df8ca8db46404243ba44cf9173a9384ae&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408971988772458628/GVmCOxJsptQERt6nvNvpSAORb8lTvaupQZACN9mUDb2-LlWP_cm-RDWbyDBsBkTu_PTWzAp2OFtfbqU-Lz0Q2HmPTeDSIG4vegmIPfpkkDGYW0ANJwDsek344KCIHh8eGFfuVG5EJugw1280.png?ex=68abaeeb&is=68aa5d6b&hm=017cce26c2b2c420b4f5821f2b3cb9269f3b3bdd251cacb549d1deb0b876dc72&"
+                ]
+            },
+            {
+                id: 76,
+                name: "Skellingtons / Sematary wit da crosses tee",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408971996422737952/JgnsT_zOvp_C6II7CkvCeTFls9sk5UfSWuVPECOsYIW_IuoXV_rR8QovUpd-atzpFEASNSLwDFvAaGbb3NckykTD-XrxYcV1RfysFtq_LIqosYFJ7fRN-aMU9bggVSuHT268EVNH9Qw1280.png?ex=68abaeed&is=68aa5d6d&hm=e2d3cda17a867542f6b8aa6bd67832f922c8a3a80e450a9206eb0c4979798fb6&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408972006099124374/mHYuNBV41EgfBKfiNKCzUxQ8iQJ5xgMp25qmx6lZ5ke0eXVMIIowPVG81DJ6G_2OZxB8SWTBoSzzeLPt5t9Fodiy4uc8CXDNtPNfYVYpTyya0MulNmH38-VpcSoh-xnQ81OZyHMNAm0w1280.png?ex=68abaeef&is=68aa5d6f&hm=18ef36f9fb0b544797f9a57dda74b40fe338ce946508660de0e6d97882ffacfa&"
+                ]
+            },
+            {
+                id: 77,
+                name: "Butcher House CD",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 30.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408980149151600710/7jKjGwGs9PuSv-0ILJuNtdSFEpkjVejZ-KOeAfsJbp0h52mU1SSy6sBkQUrKHcHbCGaHoRMWTGt3hn2mG5yrXU1J2UJ69BVrwGT5fIcLmBj13CatfDCCZYl1DqTvuFdpscRNl010loUw1280.png?ex=68abb685&is=68aa6505&hm=67ebeaf4d7f1687034b2380e667e1aff3d58104f7e32db2e367bd86eea767d21&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408980154990198904/VFH6E5QJXtNpcJ2BeFPGggKDDIK5W87cy4-5clP3-bG4sLSKu6eiRAQpjDA2S9Kjmjh67GUZJv5LwvaX9JwIKjOLzJyStej4ktM-UQyNTfjcMbV-JBRB3hiSg-JZNL_ntkwTJHEy-CQw1280.png?ex=68abb686&is=68aa6506&hm=cfbd453d94d51eb35462c0590a44d7175c539914fa0ea04a0e063aa01ccfc845&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408980164226056274/VPrGrhxcqQsjHgOpDaOGeG9p5jYY8pTGUaoiirvpHcvgu8i8TMBQOmp3z_0mvZsdmhq_IScIMIXpAmF9xppq8s0enuNYUl8f--cyfQKY4784dPodA0myeMeIKieKLgcFyhOwWTOxBgLUOtr8TNH3NhQpgUv4sIAXn09VqsFRRnnBF775Kwryw1280.png?ex=68abb688&is=68aa6508&hm=fee05c29facb0a6d0e5be0ae168389adb0db7bf263c9604abc8e8a31babe48ca&"
+                ]
+            },
+            {
+                id: 78,
+                name: "Haunted Mound Reapers Beanie",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 35.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408980598332325888/IjNTP_m6iz_ItLWCiSg6nquhOSTwNjFrSyukXb0WCgexmyP6Do08nUnaZhSAe6K5H4XVTxEZlA4BWKWKPGNjpkQpKYzh9h-rz9xbpiytuEIDdok8Jxcdg5esyiYoqQc6UnWtgFZxJXbNHDXWm4vWKW2JE_I5wzfGpxFv4CCD8_pjyOqzhIyoKww1280.png?ex=68abb6f0&is=68aa6570&hm=1ed449eaa77d90a2bd3b323f75bc2e9220ef09347f52715d56c1484aadbbe88b&",
+                ]
+            },
+            {
+                id: 79,
+                name: "Tour Lighter",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 10.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408980827618021386/PKH2-CBEcUDh7s4QiqmNkUUqSDdBM2ZEJ90feVZRjJKYtwnztlqoyGw3V8uHfN8V-w20qSCM5wsyyZ_78R6P27jdW6Ig9WvLtGs2nnwVp4d-wMjF5jPK1aW9JFCyg1O96JFfHaEbvv8w1280.png?ex=68abb726&is=68aa65a6&hm=80e84a9ae5482e2c589492537f9d168bda8fc4417f59d07d4ce5e10133830494&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408980832298729582/5d9HkZMp4GBjR1reEedYus98AhF5SPqA7M1rYkp8R_lj-ctijlOBUopQg8zcC_MM5MeoonljBWKA_L9xX9WETkPBV6SeT8rUufYlkgeT_H7pz0Q4Wq28grnbj_t8-v7vgjh2ZgDbe8Mw1280.png?ex=68abb728&is=68aa65a8&hm=1f7983de350a2bdcde88387c5c8ae210b35f56ff00fff24b8055134572527e75&"
+                ]
+            },
+            {
+                id: 80,
+                name: "Tour Harold Patch",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 10.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408981110498525395/vgcBQFAGMk5Vl2etiOFxu0u7Fj4LccqUrskbOqUZYIy6W5TLMfO9E9ugvfVZPCKtK_XQOxlLoC40gMGn1V1D-BdzLYkTmA6lNWzOmKU8vzn2TfKLMJDqFZXSBwNToFAIWjWbktl-lww1280.png?ex=68abb76a&is=68aa65ea&hm=2282bc07973c81b2a75d6bef9f2b57a1d116dfdcbb62da48e05fc295c39eb79a&",
+                ]
+            },
+            {
+                id: 81,
+                name: "Tour Poster",
+                description: "Release date: February 9, 2023, Stock: Unknown",
+                price: 25.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408981887170511029/XnMq598oD7YS1eaK-0DrZB67EPst7xsqyjY_kiRUUH_Fk4CI07EtjdK3iZEGSCj3wytAdd_K3bzbpSuK2dV7t3SkKeTozNNmQksC-I54w94hsYKlNQ-MfYEm_TSuYCf93UaoBcpXWAkn0xVIWfn0AQpfIK7SlT7E1lgJJ-mprLL-h6LSetPQFAw1280.png?ex=68abb823&is=68aa66a3&hm=987d6f4e573608f527905c3a0ed381828e0f5c445eb39bd0bbfb3576fd062c79&",
+                ]
+            },
+            {
+                id: 82,
+                name: "LA Night 2 Tee",
+                description: "Release date: February 11, 2023, Sold exclusively at the 2/11/23 show in LA, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408982184282292314/kWpDqH5jOp1fR-ZP7tPImoX2qJ3Dt80t4nM8f7JFb4MVAIBUYEQSica9gnVzOSwWWhKuaiXFtpc51nEzaWIj_vfHVqBCOj72-snEvSajTvT-pVbGTSFKc0csQYKWit0u8ALG6uBTXs4w1280.png?ex=68abb86a&is=68aa66ea&hm=adc7aa37937cd7e610867e931734c27e9d9c87023be70d4591f3194d53c5acae&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408982191857471538/ou4kW93Ay93AAnaHase6HQFLO-I8dBOpKGL8Ei2ig2wmr2mwmp_WRwna90tPcLG9-JahEJmbS-rThDO15TUTnxcHB0krErhevm158S8b62ey7uoDXKVK4Gxiy4NVBGvkxWVmCWTI1TAw1280.png?ex=68abb86c&is=68aa66ec&hm=3445cec39c982180fd88903d2cd2d45caaaf3493aa4d80dcde089b8c392165a3&"
+                ]
+            },
+            {
+                id: 83,
+                name: "I <3 Haunted Mound Long Sleeve",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 60.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408982543490879631/S68qB2kER57N_8arvE8Yiky3LFmF85wFLBnhAL-ipn_SC-JTC0ZpUkoEp_E09bEwoJoC6XqQoJjdglef06TKRFswza7d7r_NnRsEFeMgeFyZ8UrDmZKbk5UeSvlSW0lD2mfIcLVT-3Yw1280.png?ex=68abb8bf&is=68aa673f&hm=2ba2628b1dde35292b8aec4feb856445922c7862464e3920e63c253cbd6f2dab&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408982548780028026/mLzDyAjSicus5Fz6MSa9GpvZ4zwettcrAmgiD5utnun99elFu62ZU7Y1F-jUmqYYkecAc1kCPJQAWwT31kVE9utbn6feZ2jqDmd3uQ8z70rcgt9MvsRQ3AEEMrdrtFuslxPeYFziiSMw1280.png?ex=68abb8c1&is=68aa6741&hm=e7b370d246c2e18259c699c8156a9e4cc4e11fbde7ba4d35c46d4a9573564103&"
+                ]
+            },
+            {
+                id: 84,
+                name: "2nd I <3 Haunted Mound USA Flag Tee",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408983306615128084/Z8ZVTlqVVyBDr7hK1nUIWjZDYKkVwgIAlS5GGGg1g-8OUm07SMIQau3PCP7m_nrHXMHlihlX_NJt7DON0g92kMoGmk_vsXpg_xVBopxow71GIqmSnAe19NzG-Onr2u9BBwzgWOxQQ8sw1280.png?ex=68abb975&is=68aa67f5&hm=82eb9860c7940148ecbf81ff5ba61b7c0a0803756f13024aed9fb071a6075eeb&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408983315037425796/pM4uC7WRUCTc6OE67rB5zBTR2H_USjyXYqGWlXSHvDry5S2fEgcjpHv-bLGNj6nHUDygf2mGjYyNpaon2rGhPW-b_7b3Faghup9hIuyxrr4UECzmxG1rIkYhCCtA3zepn7-qz3TkYpYw1280.png?ex=68abb977&is=68aa67f7&hm=0ec99d2a7180707cafc6e7e0669fd8c9e973cef2abfa67a5d618eadbff868510&"
+                ]
+            },
+            {
+                id: 85,
+                name: "Buckshot Hoodie",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 70.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408983325472849960/m4mi8tILX01PAZ8u4DVBssQxCyxgWLFc7IK_H6FFzm501pA1MMLD3wvmXUVfoW6uqTPHN6YTkrPTTsG2JoW1D73B_6CUOisfxamDhTQwp-uuF8Nrq1tf6d-X_sk5jmrrRtBbzUVBlAUw1280.png?ex=68abb97a&is=68aa67fa&hm=85e2a57947c98ae2b884c07eb6d2208d5e516ea827b9aba4e3c56bb06823d215&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408983334478020729/fDeDycUbGnZYv_KCfbrnDwWdHIvQtuNlGRYra8t-WWaF1qwGesDH5NnDFhAuPAC0B4uItdt7Hlt2A7CEOS9t1gS3mikGICdie5kjpW-Zs7s4GSv99VB8BG95q-Ug5szGCgsLjAVLBO4w1280.png?ex=68abb97c&is=68aa67fc&hm=5b84fb90e9af04b5df25dd086348153f90296f3661730fbd1ea30c27b88cbb26&"
+                ]
+            },
+            {
+                id: 86,
+                name: "Buckshot Memorial Tee",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408983802981650513/Jfab9CO-0lZxW94eZAVToXKk8vCyEyNBxpx-50pHU85oFUqf4v2VrMCI2iMjRRWdCdHF-9w9vht_PMnB-kDTnQQ1khxTvVv2PQvv6bDgdVbme0i21h8FWVX2ZaGOg1XlNP1VcW4PFnUw1280.png?ex=68abb9ec&is=68aa686c&hm=a4a137acb7388e021c9f195b953c5d16ef24fef06701a816a4eef21533f898fd&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408983810233733120/jchuP5tHXyGtUIDZQZzeA7UWarnzybbOILTPWuhae_NE-6N2n3Tb1_J2f1NLCO52ghE7YrUt3tjZL5qIONDQu2MviSiPh3iWJv7P8N6iijQ2ISwFiQYV_XkNfhXi-1r2E7Ey1FgxDqUw1280.png?ex=68abb9ee&is=68aa686e&hm=5fc80d184050caf282637d46938f1cd1047c79a1d59f58596010ba81a4a5b727&"
+                ]
+            },
+            {
+                id: 87,
+                name: "Buckshot King of Ireland Tee",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408983925778546758/g743DBTfsGZ8wVzs7Wye7D7W26gjAJGfFADuuc_Fbxi8tUYWJ3BADBQvp8bLSnz_fhu54it0LN1Bzkt0DeO5sDNhoVGAbOd69C6svdJFrDOfZZrKnmo-ABcjc2MWrkj1QYpy4jswOpow1280.png?ex=68abba09&is=68aa6889&hm=55dfc48b9c7fc68ab78f167637070ba2ca0029b85960528410ef9df9b188c2aa&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408983939527475301/o7G-0p0P2r4nUS3qhJiMaV3LDP1kED-ytp3bVc0R4p0YHmYqcgdL-W2HcTEfGx6VdsvrXs9PZ3pa2C2hO6zn-btezxHu6bTNCk8EzlGVOUj0s6BjtvJ1AeltTM_28wTZdBksHVvfPBcw1280.png?ex=68abba0c&is=68aa688c&hm=f0e0e098464208bb3aa8770a2077679383d070b0125f674e0e28e7fdb574fc53&"
+                ]
+            },
+            {
+                id: 88,
+                name: "White Skellingtons Tee",
+                description: "Release date: July 7, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408984093101785138/MxgzGuSyH7kXGjd_d9eEuyf8fBBn6cHiRWJOF_AqnkSQZxwwVWeD7gtcZ6YnSAbAL-lqBTLrWyMbhklzq5JGUZooh5O9VH12zwpXoheQQ6v4TV2DKo8BhmfwF160Mz2MD8EkL3IrYgw1280.png?ex=68abba31&is=68aa68b1&hm=d8812128a9fe936bbc520104280cd6735156e5953b4b0d3088c7d5a3edc6fad6&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408984097866649650/CCvGdWF7qweogfds5YtMR2tJQWXjymsme05N-59wINHgJ_jStmPWlGDoFQAV8-YRn7pWLDQd-9SPXhJ6OzszgMqpBZZq5YVc_8evKZvj7iQes5elkJestjlq_vm2ZtKBaldiu1_TUdEw1280.png?ex=68abba32&is=68aa68b2&hm=0a43f4ea1e93072e26090789ecdef1393d40e5468efe7d726497183d0443b2b0&"
+                ]
+            },
+            {
+                id: 90,
+                name: "Australia Tour Shirt",
+                description: "Release date: July 15, 2023, Stock: Unknown",
+                price: 55.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408984369779048448/t0--NqlGvjoWs7R64V3p4WqaQ8rSGgkSuGTRf5Z9lpvi4wPdEWSoVMkjoZvPhqWNl1jbqVzF-2Z7StA_WZelYYsIiXHvoaSZXPgJ6pHfS-pe6mMKS79kBSVBhDaUT-8DZIJzK6XLfjhXynE3pc8hsFwPvGdE5PIqN6oLWsculaLA2WqZ4Ct2mgw1280.png?ex=68abba73&is=68aa68f3&hm=03a3c169cd1030bb25a15fbff24ab4be8bef1d2896d4b649c784ea177d78ca87&",
+                ]
+            },
+            {
+                id: 90,
+                name: "Australia Tour I <3 Haunted Mound Shirt",
+                description: "Release date: July 15, 2023, Stock: Unknown",
+                price: 55.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408984378389823588/0fccNZN9olJCYd0Lq5ECOCHtISb79BV7_ELEghP7NBiH1RL_xmflxZQjWCbSNA6g7YGOazpL8nPIL9fqBZ-7OPg3LPzals5K_Hu0AWxfgypg99XjdDhoS854NlaghZq2u0_YDaPzLhVPBFrPn7AWb6B5eIfgyRRkePYT3FEuy9kM30uaRDDPNAw1280.png?ex=68abba75&is=68aa68f5&hm=60b675dc93759e022b71a691f37026fec3ea6e8b0f4bfdf42c56f17a3aa34373&",
+                ]
+            },
+            {
+                id: 91,
+                name: "Turnabout Lord of Ephraim tee",
+                description: "Release date: July 28, 2023, Sold at the release party for Lord of Ephraim. Stock: Unknown",
+                price: 35.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408984889457512560/vJszXIJDRqdVAla0OtzackqhLBX8djDE5kwHzmIDCUu3lx6Ai27NJ1C9JlM9q2Fqdkj18IVj5nQNnxYElqRVdFdEPfnOMJ2PFDwwv4KbmkZ9C2scOBGaHly9iq5BPCSYxcUSY-8t7S2WEbpgmPv5ZcplqV4RsgTLCss7td8fPddDjhwmlIgUNgw1280.png?ex=68abbaef&is=68aa696f&hm=0d634687b0e04dd610b60a427170ba943628c0db6499e12ffaefbe7b19f4c11e&",
+                ]
+            },
+            {
+                id: 92,
+                name: "Grey day tour tees",
+                description: "Release date: July 28, 2023, Sold at the merch booths at the the 2023 grey day tour. Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408985200611823707/image.png?ex=68abbb39&is=68aa69b9&hm=5ab352bd4ed76f09bcca16b99dfe8ad1fb672e0680712bf01f0b52e09ec51023&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408985229766688788/image.png?ex=68abbb40&is=68aa69c0&hm=3bb74b3385eff85a8f6abb25ee55fd980cd6b03b27788c140889cf9c38129299&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408985303787507743/image.png?ex=68abbb52&is=68aa69d2&hm=72f55133c19ff693bd93a8b9f64720b0f740abd544dd6ca1319c0e1c0819e839&"
+                ]
+            },
+            {
+                id: 93,
+                name: "Haunted Mound x Affliction - Black/White Crows Tee",
+                description: "Release date: December 9, 2023, Sold at the Affliction x Haunted Mound show. Stock: Unknown",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408986163846578227/CQXCR7nlVX4-G2AxEEN6MCRJpS4DJkRzzpXYkJywNhtJXyMwhtNDOD8U913Mqvuv59hbNaGg0ExSJvEJeJKwElXzsnh4wYoRE8n4UEWjIidYH4M2yMS0-Jkfz4907mon6EfMAsRmCI8w1280.png?ex=68abbc1f&is=68aa6a9f&hm=df350aa7f6bdc4ac245d1a890079ce907cdc1bc1658c51fe431df819a27eb1a4&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408986158993510491/dFsshirJw7fRNrjuqeCf05Yp9zwq-T4wWrYIhgLGrn84WtngFkctkMe6rHey-geL8mDyIkXGAR5Xonk2Xn85d_XYuAOFez7_DrUvgyDn4qqs1ABdy5LUj_HTyN1iIn_292JxVH8GgfEw1280.png?ex=68abbc1e&is=68aa6a9e&hm=836148d4d6c96ab01542b6897654192c9048a8953244e7c48f897f524a4f9529&",
+                ]
+            },
+            {
+                id: 94,
+                name: "Haunted Mound x Affliction - Haunted Mound Tee",
+                description: "Release date: December 15, 2023, Stock: Unknown",
+                price: 54.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408986517820538890/y8LRFqdZXLJYbtCxcm3A8XeG79ExCISTfKdk0i3M1q0sPH_0sSv_HbYRTzLJhYaF0dr5GXIIDvvNYKwVs-6d3ulYXldYokUY747WR3HPZm2qFe0gRTzAJXYyCki7T-ZV79ybIf5oB0ltB3m71TRJeVtVfKxyU5Pv0qnq2gdl-uAFWg6vWDo7pAw1280.png?ex=68abbc73&is=68aa6af3&hm=7b75a10231b48df787646029f6c88f369936aa19c6187efe675e6a7a57bd9e00&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408986524229435544/nnVifL6sYEzmmrhus-4SAcoTCY8k0BQUTamdURiQY_1Io6LHGoPlzlceAWQc3A17K0cCgiAnxAfYoRn5R0RFzo82nKnVhyPYcG-9CuIGIUyHFSjh5zXmSea8Elk19Y8Ho5_-2mNNW31c-CYML1lahWdw-jYjtVk_rVoyQFd6aJnjAS45iHdviAw1280.png?ex=68abbc75&is=68aa6af5&hm=654bea433c1988f4b174593ced828694c6ed8e0e848c388bd6af37e785e6db4d&",
+                ]
+            },
+            {
+                id: 95,
+                name: "Haunted Mound x Affliction - Massacre Tee",
+                description: "Release date: December 15, 2023, Stock: Unknown",
+                price: 54.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408986762595799100/FDwz3TxcGlZC1nayWZyfj7d_n5-q5Nf2uw3r8TjhlihhWPePyxtdlgC0ZhHUouNiLy9yPeaKAf8dYd52jdi8i2mMM46rXeuqaFx7do5Isb1zT-0Uf3N5aWU29LLArFaxHr9BrNpnLnahKxJAlbW4Ro0E2mGw8WpDSz77wUZOwJlFh3Y2u_Mv6gw1280.png?ex=68abbcad&is=68aa6b2d&hm=446d29ad307d457d1f41b7ec7d525274cef95c5974e8ab98dc40268cacc2e032&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408986759458459668/iDD-_nCtsM6UlqIU_3t0SmCFpHh2lFs_BVL0e_a1Vxz1KD_8R51z5OcuIUDb6Ne7XMD20O56FwsfjHZtcRPLJ6mLuRB6AiiKucMJsUpV0VwdPgcRHC-ZiBCmctdZpmPEAo5qKBvQkvBxMIzijRFArOVocgkKL0ntRk_XJmLNvuFcTt02Hs6W_Aw1280.png?ex=68abbcad&is=68aa6b2d&hm=f0a2c58e48d81e88799b27da16ac0e59586fdfbe69eab400020b11ce556c338c&",
+                ]
+            },
+            {
+                id: 96,
+                name: "Haunted Mound x Affliction - Sematary Crows Tee",
+                description: "Release date: December 15, 2023, Stock: Unknown",
+                price: 58.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408986928631517204/sQ-RkY5N1JJ2xa-NT2JLiTV5ObLnlZBk725NE6hCbhyoZAJGaHMeYvH-xY9tqmiBvPsS_58l38_LKDQwtfAFtZRt5JA-Fv3b85GUpH3dUutMMrZ8n-nYFHq-1xUcIFk20qTV-oxTrm9cOL4Fb-5PeyAPM3OPQEyfOM3_ByemMNaD41-n6TSpoAw1280.png?ex=68abbcd5&is=68aa6b55&hm=b0903c5f75d3da9c576f8d62d36f9322446474240ffb212d1368abe5f46b1cb9&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408986931618119731/IxTn3iPzD1-sQSm0HOxNQH_fskJQURB_1FoEOKict8euK6w7ME5u1h5FMy6ix_-faOZtwED6u0MdEy3SWbEoji-fo-4wo5XAYLSsT0CmRLf9L-UIeRZvB-ikXw9PQzKV1VEv-18Qn_vsrbZTxH8Oj8_JhDP6Ka0C5o9rKO53-OjK0lNoeEtN8gw1280.png?ex=68abbcd6&is=68aa6b56&hm=e1fc666e781c5931e0e302c2a7f88482463ee8903719c5cfc6d53a5301ca64ce&",
+                ]
+            },
+            {
+                id: 97,
+                name: "Haunted Mound x Affliction - Haunted Mound Thermal (December 15, 2023)",
+                description: "Release date: December 15, 2023, Stock: Unknown",
+                price: 64.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408986967244279808/l-A8bneK3PoeBovqeNjT-N9y071C3Ve2vowizy6nIgo9Atv2dcCV7veNUzuu-2IMF1wizQ9EyVzhvFcl35qMSDHO5bxSq6lOxTLmaQpVkQxOvxpk78YzTMotJNQGrrgVwE3e1ND3yx5txNaTSdsEtu0SdlyqWeqndrrToCgJrj0b1UZrmAu72gw1280.png?ex=68abbcde&is=68aa6b5e&hm=7e061e527d8dac83a0180ceffe7806c38489f4876e8268d2c6a0aa40bf30ba4a&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408986974236184576/WTl2PNlO6cT8mkwxOv6MF2cM7zjdwq7RHDDwpTx8e62ZjmsfpvEag-ERxok21IGZM1MNXYUvretj2mVttc78SxsdaXOp4S823ltg6WlKDI2pQl7rBwECxYKuAySWEOtPeA3fU8uhEnx8zq0HOs_4iQKPouS5cx3y3bJckWX_dOwXMRnwQTfxsww1280.png?ex=68abbce0&is=68aa6b60&hm=06a742b34add13946657fa225a518d22df221f0c262a1cafd44f1e97c5ed9946&",
+                ]
+            },
+            {
+                id: 98,
+                name: "Turnabout Iced Out Hoodie",
+                description: "Release date: December 29, 2023, Stock: Unknown",
+                price: 70.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408987401803530373/FystP0S6HMzq-f2nxc6EJWSjLXD1RL5cyQCeJdbrVwAzwS8zuZ8p6FfkYU1FOgPYwGD89iQ7CvPka7FXD-jFg-GJbhspfgPirgvNHLm7ys9x9ye4g-bkIOlVOb2q_1VcjTirlrjxdAw1280.png?ex=68abbd46&is=68aa6bc6&hm=094f462455a60820af0b9af3b0bbbe628e6303d76bdbc5027f8d826486a7cc22&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408987408795566162/LZStTy8raVnplFYLp781jq4vEdJpXBpSm0FPEmImPktVeGGkSgl4218z_94fnpbsIRmfvOJTSoTfK_TikuizJ2Bsfv6KXY7ugGsG-gyTaeOqAMgCAOZy7cKE-7N4Fcw28veygjFdWqEw1280.png?ex=68abbd47&is=68aa6bc7&hm=5aab79aff9d4419570c1fe14d50748b7d9ac81086087e5b72c58ddf3d5914b84&",
+                ]
+            },
+            {
+                id: 99,
+                name: "White Turnabout Cross Tee",
+                description: "Release date: December 29, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408987788908433529/wYRJ8CLXoLPPnkQnfx5aal3c-TApq68_C6c5jxjBnC7KI-3NgLQ2-Q1lPIOYzG0awDxtC2_XZGMhVJMrZb_WP8TgsC3RDlbhRangWgJntv7th-3WBIZ-gdOMwxE4OwpZakTzYzCAccQw1280.png?ex=68abbda2&is=68aa6c22&hm=10ca43f6667f909f06e73d58052178d605fef59ad7ff8b1fe2dd1ec5564ce950&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408987798001815583/dqvMeUCGRk952iGpLEwUwnqKkao2hpLT2rj0iWfhJJaJRkf6j38FCtVFcRq6VX1KgIcm1b3xwBJUYh-9cvWGsCoD8ALNbEAbt_JknQutDvPQeTDgIRs2mmZQdMXLHBdX4T-XgNMECQw1280.png?ex=68abbda4&is=68aa6c24&hm=c7680d96e68f099c0a803f256c7d28e33e9679eb2f80a4a43fd20c10dedd38a5&"
+                ]
+            },
+            {
+                id: 100,
+                name: "Black Turnabout Cross Tee",
+                description: "Release date: December 29, 2023, Stock: Unknown",
+                price: 40.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408987984942075904/ZfCMKkJ59_oeRAJ4qF53NETtbTzr7-QlYm6Tff7sSO8tSVe4XlU6xCsIvDJ6ZNuRhqx5e3Dkh1Ai3Y1hSd_zdkmma_tDnT5AQGRidWnojS0BGT5QpI4QjNj0zG3mvugzfZ7A7TTsDGAw1280.png?ex=68abbdd1&is=68aa6c51&hm=cb9760f1df52518cf9f6e16f80b76e5abf84b9c6d2715eec70352b12aacce515&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408987993875939418/bEuUMWWU-ZXbke8E9FoQFWPKAeUIrkCP-btqZrLrBKHI3Gr1OmE0YR9-BdG1joMpt-7BbfhZbGuKX02LJegV1CawCC_Cbzsz3vVITUO-R7X_T6tbO69ILs-dQbGUNfs7jKKK711fPT8w1280.png?ex=68abbdd3&is=68aa6c53&hm=1e21f57253068613b604b1f03c1e367d58210db346d2ce97a36f7ac97a869ce4&"
+            ]
+            },
+            {
+                id: 101,
+                name: "Custom Harold Leather Jacket",
+                description: "Worn at LA night 2 show. Made by @gaps1396/@chrysoliteavenue on ig",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408988218120081508/g97NLRLjkQmy82T9YfMpYZQhV3cL39-tCovvhcSIlyDNpIitWP3nI1Hc6LUU4206IyNNj9Dwx2Iu2Cfs1Yi9GIoZbWAVXIdHjiqkAM3xQcWDeqL5xgkjUNNskpH8biD_9meq_1BKoegw1280.png?ex=68abbe08&is=68aa6c88&hm=c402d0466c767ea2c0fd38b8d63831559766d7796b920401727a3eb11bb7333d&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408988225686470738/bzJoKdOpvRt0_8lM1hMhYabTiwpotvWu4P71hy3WHYDW9KgfRj7uxhAIrTWGHHIqRZNnH9udUkRLP_SIB3_pwuJkYPBg8GNomhpRLSm6EfyJHcmhAovLASZnMGgcr5c3NDjwEU8cv6Yw1280.png?ex=68abbe0a&is=68aa6c8a&hm=7b8af92484ebc3c9763ab4c775825a4de9a05312fe16363db9cb8eacd04061ce&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408988233206988864/uiO8h2DwpSpIrwBb4O22HchPmA5xo8VIbtJwVkWZfeZSTGwOIBjoUJWscP2l6KinnTSoNSiz0EAKJ60Z7-dpOg9GodA4l9vniM5kjOpa4oPlHsBV3LkTM47it8YccnYVMpn4WrgqBJww1280.png?ex=68abbe0c&is=68aa6c8c&hm=9d3a2b75736cd5cbf9bb05d0c36442c7f9753d993a95797038fb3d00deaac909&"
+                ]
+            },
+            {
+                id: 102,
+                name: "Skellingtons Logo Camo Long Sleeve",
+                description: "Release date: July 20, 2023,",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408988549876944926/4lCJ6M5I4DB_3i-1-RdTWDLNguwxBzcutZmNahqE-71qu64s1tVBFteUriG7Df4e-aSRW365nb5D31uhThO3r-RHOdZ2sRU5WmEjgJCL4jWEMdzB6rqwri3DIm69NdYyloB35iOQRzVMlOD1XjOmAi4tzishUZpt0Lm62fGaFtGTix3nyZVmMgw1280.png?ex=68abbe58&is=68aa6cd8&hm=8a06b2701c57dafad58ad777ebfeb4c0ea630552a607cb6a1793a330bd60c351&"
+                ]
+            },
+            {
+                id: 103,
+                name: "1/1 Patch Robin Jeans",
+                description: "1 of 1 made by no_name_no_reason",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408988823311876147/image.png?ex=68abbe99&is=68aa6d19&hm=0a497591f2f31aeeb1a504ff44538b4b0e6c231a3746e1341e1dcec21b2e6d1a&"
+                ]
+            },
+            {
+                id: 104,
+                name: "1/1 Skellingtons Tanktop",
+                description: "Worn in the 3AM Gang Music Video (King of the graveyard EP)",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408988964873965618/AjLWDYjdv_3hyxYT8_gcEA_rF3p0_tFwXldsQb6FiMqoz4N9qCXLXzGL3jsfmIv7PVDz3W3wWH0CH4SaBJBVTJ_ZumV9dXgLiwpZyjVb74Ijw2R4nkpx755glyVQwf8ELIbTlHyfuee3-7S2yqmVk5qfaUUjDX-MgJoDTzWo-dA-WwysFxMBlgw1280.png?ex=68abbeba&is=68aa6d3a&hm=fc92bcdcfb55205cead315d68704cdd3f79ed43e58adc2aa8c7a8a22062b6779&"
+                ]
+            },
+            {
+                id: 105,
+                name: "1 of 1 Harold Belt",
+                description: "Made by stolenarts",
+                price: 0.00,
+                year: 2023,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408989202913431572/Ropq4qjDbUXbvuK86XdU3GMCXlyodiTUa0s3PWmSHN8ENKlZlVlsHN7ZR1DCcn23n6wnDyqbIBOGBASFmIZ-hH9Pn6k4QVfluLCpBWj3njPaJvW7pzCi8ewusE39d88IXDWLcmObvftZhi52gTptv4du6tsFilL_-Au_wQT93EzJUDtq8VnvTAw1280.png?ex=68abbef3&is=68aa6d73&hm=eeef5098af70feeb7fa5e76af34118e87b9e02c92261320d92e43558b0b0b708&"
+                ]
+            },
+
+            // 2024
+
+            {
+                id: 106,
+                name: "Bloody Angel CD",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408989737850769490/image.png?ex=68abbf73&is=68aa6df3&hm=7da44abc4bea306e1b3b7902202e29c4d68ff43f0e36499d1662df80c5a7dfba&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408989784067539025/image.png?ex=68abbf7e&is=68aa6dfe&hm=e13d1eff69cdceaafbce764e6f20651e04fec2ff3fb22df9af87f8e7bcb4af71&"
+                ]
+            },
+            {
+                id: 107,
+                name: "Sematary Logo Tee (Red/Black)",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 40.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408990992253849600/image.png?ex=68abc09e&is=68aa6f1e&hm=2961b63d32f9320607f314499c76329f78978068c86bd2f7078f038d5e4f24d6&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991009102368768/image.png?ex=68abc0a2&is=68aa6f22&hm=973e71b9a651bfe9a032dcdf9868158d05c9ad1f930ae3256c40c919ea6a7aec&"
+                ]
+            },
+            {
+                id: 108,
+                name: "Sematary Logo Tee (Black/White)",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 40.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991314749689926/image.png?ex=68abc0eb&is=68aa6f6b&hm=a6cc3b479ceebb774a6f32bffbeb821c85fab0ab9775c6c3a5625cf29c984a02&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991333669933260/image.png?ex=68abc0ef&is=68aa6f6f&hm=1bfa158b40084b96f7d505d7b954286bb96ea68d25062d49b8ceb4e54608b866&"
+                ]
+            },
+            {
+                id: 109,
+                name: "Sematary Logo Tee (Blue/White)",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 40.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991403022880829/image.png?ex=68abc100&is=68aa6f80&hm=814b3ecf6d48b0d95836a69070fa9356310175578165adbd1d2540dc01c9be83&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991422258085988/image.png?ex=68abc104&is=68aa6f84&hm=2a622288c44e06b713acfb692cc168e3ee92f580f40f165edef5e10c3af9de6a&"
+                ]
+            },
+            {
+                id: 110,
+                name: "Bloody Angel Wire Bat Tee ",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 40.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991521310507069/image.png?ex=68abc11c&is=68aa6f9c&hm=4d11b734515b9afdc65739839be82d3f4170578596c8984556b86c8eea276e2c&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991547982352464/image.png?ex=68abc122&is=68aa6fa2&hm=e6bf27531b616368eaeda2d1da86969dd4cd8510ce9d9b85bc352e6444c91b70&"
+                ]
+            },
+            {
+                id: 111,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 5, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 112,
+                name: "SEMATARY ANGELS TOUR HOODIE US/UK/EU",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 80.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408993208926736404/image.png?ex=68abc2ae&is=68aa712e&hm=d5419894d12ae5e9d9c1e32577ce760facdd593ba02f245e769c83590e30e814&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408993240287285308/image.png?ex=68abc2b6&is=68aa7136&hm=13bafc3e6ff03f70ef2e1345d3758c8b39ae6fd35f4c31f3c3bf80d0cf1347ac&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408994082151469096/image.png?ex=68abc37f&is=68aa71ff&hm=39df5eec0e5fa0c1a6d6f5ca819c5d65ada8863f30ac8418a4c717e6e0142ce4&"
+                ]
+            },
+            {
+                id: 113,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 114,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 115,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 116,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 117,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 118,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 119,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 120,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 121,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 122,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+            {
+                id: 123,
+                name: "Bloody Angel Blood Tearz Tee ",
+                description: "Release date: April 3, 2024, Stock: Unknown",
+                price: 25.00,
+                year: 2024,
+                images: [ "https://cdn.discordapp.com/attachments/1408540975688716322/1408991630048100353/image.png?ex=68abc136&is=68aa6fb6&hm=adcd5524e9459a77edb5d9d17ba8eda70c58c51821e1e83c7ce51ffc7dcc8fcf&",
+                "https://cdn.discordapp.com/attachments/1408540975688716322/1408991651094986762/image.png?ex=68abc13b&is=68aa6fbb&hm=f96c55dc2f67459ea7fd8edc88194468c5d19a6896a7975c4dd64b805a367a0d&"
+                ]
+            },
+        ];
+
+        // DOM Elements
+        const merchGrid = document.getElementById('merchGrid');
+        const yearFilter = document.getElementById('yearFilter');
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightboxImage');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxDescription = document.getElementById('lightboxDescription');
+        const lightboxPrice = document.getElementById('lightboxPrice');
+        const lightboxThumbnails = document.getElementById('lightboxThumbnails');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+
+        // Current lightbox state
+        let currentItemId = null;
+        let currentImageIndex = 0;
+
+        // Render merch items
+        function renderMerchItems() {
+            const selectedYear = yearFilter.value;
+            
+            // Filter items by year if not "all"
+            let filteredItems = merchItems;
+            if (selectedYear !== 'all') {
+                filteredItems = merchItems.filter(item => item.year.toString() === selectedYear);
+            }
+            
+            if (filteredItems.length === 0) {
+                merchGrid.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 5rem; margin-bottom: 20px;">👻</div>
+                        <h3>No Merch Items Found</h3>
+                        <p>${selectedYear === 'all' 
+                            ? 'No items available at the moment.' 
+                            : `No items found for ${selectedYear}`}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            merchGrid.innerHTML = filteredItems.map(item => `
+                <div class="merch-card" data-id="${item.id}">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">${item.name}</h3>
+                            <div class="card-year">Year: ${item.year}</div>
+                        </div>
+                        <div class="card-price">$${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="card-image">
+                        ${item.images && item.images.length > 0 ? 
+                            `<img src="${item.images[0]}" alt="${item.name}">` : 
+                            `<div style="font-size: 4rem; opacity: 0.3;">👕</div>`
+                        }
+                        ${item.images && item.images.length > 1 ? 
+                            `<div class="image-count">${item.images.length} images</div>` : ''}
+                    </div>
+                    <div class="card-content">
+                        <p class="card-description">${item.description}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add click event to each card
+            document.querySelectorAll('.merch-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const itemId = card.getAttribute('data-id');
+                    openLightbox(itemId);
+                });
+            });
+        }
+
+        // Open lightbox with item details
+        function openLightbox(itemId) {
+            const item = merchItems.find(item => item.id == itemId);
+            if (!item) return;
+            
+            currentItemId = itemId;
+            currentImageIndex = 0;
+            
+            // Update lightbox content
+            updateLightboxContent(item, 0);
+            
+            // Show lightbox
+            lightbox.classList.add('active');
+            
+            // Prevent background scrolling
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Update lightbox content
+        function updateLightboxContent(item, index) {
+            if (!item.images || item.images.length === 0) return;
+            
+            // Update main image
+            lightboxImage.src = item.images[index];
+            
+            // Update info
+            lightboxTitle.textContent = item.name;
+            lightboxDescription.textContent = item.description;
+            lightboxPrice.textContent = `$${item.price.toFixed(2)}`;
+            
+            // Update thumbnails
+            lightboxThumbnails.innerHTML = '';
+            item.images.forEach((img, i) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = `thumbnail ${i === index ? 'active' : ''}`;
+                thumbnail.innerHTML = `<img src="${img}" alt="Thumbnail ${i+1}">`;
+                thumbnail.addEventListener('click', () => {
+                    currentImageIndex = i;
+                    updateLightboxContent(item, i);
+                });
+                lightboxThumbnails.appendChild(thumbnail);
+            });
+        }
+
+        // Navigate to next image
+        function nextImage() {
+            const item = merchItems.find(item => item.id == currentItemId);
+            if (!item || !item.images) return;
+            
+            currentImageIndex = (currentImageIndex + 1) % item.images.length;
+            updateLightboxContent(item, currentImageIndex);
+        }
+
+        // Navigate to previous image
+        function prevImage() {
+            const item = merchItems.find(item => item.id == currentItemId);
+            if (!item || !item.images) return;
+            
+            currentImageIndex = (currentImageIndex - 1 + item.images.length) % item.images.length;
+            updateLightboxContent(item, currentImageIndex);
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Event Listeners
+        yearFilter.addEventListener('change', renderMerchItems);
+        
+        lightboxClose.addEventListener('click', closeLightbox);
+        nextButton.addEventListener('click', nextImage);
+        prevButton.addEventListener('click', prevImage);
+        
+        // Close lightbox when clicking outside content
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowRight') {
+                nextImage();
+            } else if (e.key === 'ArrowLeft') {
+                prevImage();
+            }
+        });
+        
+        // Initialize
+        renderMerchItems();
+    </script>
+</body>
+</html>
